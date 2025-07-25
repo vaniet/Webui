@@ -1,0 +1,254 @@
+/* 通用样式表 - 粉色和黄色主题 */
+
+/* 基础颜色定义 */
+:root {
+  --primary-pink: #ff69b4;
+  --light-pink: #ffb6c1;
+  --primary-yellow: #ffd700;
+  --light-yellow: #fffacd;
+  --gradient-bg: linear-gradient(135deg, #ffc0cb, #ffffcc);
+  --gradient-button: linear-gradient(135deg, #f070b4, #e7d25e);
+  --text-color: #333;
+  --border-color: #ddd;
+  --letter-color: #692748;
+}
+
+/* 通用容器样式 */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* 卡片样式 */
+.card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 表单组样式 */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+/* 标签样式 */
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--letter-color);
+  font-weight: 530;
+  font-size: 18px;
+}
+
+/* 输入框基础样式 */
+.input-field {
+  width: 100%;
+  /* 撑满父容器宽度 */
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background-color: white;
+  box-sizing: border-box;
+  /* 内边距和边框包含在宽度内 */
+}
+
+/* 输入框悬停效果 */
+.input-field:hover {
+  border-color: var(--primary-pink);
+  box-shadow: 0 0 5px rgba(255, 105, 180, 0.3);
+}
+
+/* 输入框焦点效果 */
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-yellow);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+/* 按钮样式 */
+.button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  background: var(--gradient-button);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  /* 移除默认外框 */
+}
+
+.button:focus {
+  outline: none;
+  /* 聚焦时也无外框 */
+  box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2);
+  /* 可选：添加柔和的聚焦反馈 */
+}
+
+.button:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 错误提示样式 */
+.error-message {
+  color: #ff3860;
+  font-size: 14px;
+  margin-top: 5px;
+  display: block;
+}
+
+/* 标题样式 */
+.title {
+  color: var(--letter-color);
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--gradient-button);
+  border-radius: 3px;
+}
+
+/* 渐变色背景区域 */
+.gradient-bg {
+  background: var(--gradient-bg);
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+/* 动画效果 - 脉动 */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 1.5rem;
+  }
+}
+
+/* 全局覆盖的渐变背景类 */
+.fullscreen-gradient-bg {
+  width: 100%;
+  min-height: 100vh;
+  border-radius: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--gradient-bg);
+  /* 继承渐变背景 */
+}
+
+/* 表单容器样式 */
+.form-container {
+  /* 居中显示 */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 基础样式 */
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  /* 美化细节 */
+  box-shadow: 0 8px 24px rgba(255, 105, 180, 0.15);
+  /* 粉色调投影 */
+  min-width: 350px;
+  max-width: 90%;
+  /* 小屏幕适配 */
+}
+
+/* 通用图片上传样式 */
+.upload-image-box {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  background: #fafafa;
+  transition: border-color 0.3s, background 0.3s;
+  overflow: hidden;
+}
+
+.upload-image-box:hover {
+  border-color: var(--primary-pink);
+  background: #ffe4ef;
+}
+
+.upload-image-box .upload-plus {
+  color: #bbb;
+  font-size: 48px;
+  font-weight: bold;
+  transition: color 0.3s;
+  pointer-events: none;
+}
+
+.upload-image-box:hover .upload-plus {
+  color: var(--primary-pink);
+}
+
+.upload-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.upload-image-box input[type="file"] {
+  display: none;
+}
