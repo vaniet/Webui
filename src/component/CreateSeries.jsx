@@ -24,7 +24,8 @@ const CreateSeries = () => {
     const [seriesInfo, setSeriesInfo] = useState({
         name: '',
         cover: '',
-        description: ''
+        description: '',
+        detail: ''
     });
 
     // 系列封面文件
@@ -179,6 +180,7 @@ const CreateSeries = () => {
                 name: seriesInfo.name,
                 cover: seriesCoverPath,
                 description: seriesInfo.description || '',
+                detail: seriesInfo.detail || '',
                 styles: uploadedStyles
             };
 
@@ -209,7 +211,8 @@ const CreateSeries = () => {
                 setSeriesInfo({
                     name: '',
                     cover: '',
-                    description: ''
+                    description: '',
+                    detail: ''
                 });
                 setSeriesCoverFile(null);
                 setStyles([{
@@ -306,6 +309,18 @@ const CreateSeries = () => {
                                     value={seriesInfo.description}
                                     onChange={handleSeriesChange}
                                     rows="3"
+                                    style={{ resize: 'vertical' }}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>系列细节</label>
+                                <textarea
+                                    name="detail"
+                                    className="input-field"
+                                    placeholder="请输入系列细节"
+                                    value={seriesInfo.detail}
+                                    onChange={handleSeriesChange}
+                                    rows="2"
                                     style={{ resize: 'vertical' }}
                                 />
                             </div>
