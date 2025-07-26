@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router-dom";
 import MainPage from "./component/MainPage.jsx";
 import CreateSeries from "./component/CreateSeries.jsx";
 import Series from "./component/Series.jsx";
+import EditSeries from "./component/EditSeries.jsx";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
           <Route path="/mainpage" element={<MainPage />} />
           <Route path="/createseries" element={<CreateSeries />} />
           <Route path="/series/:id" element={<Series />} />
+          <Route path="/editseries" element={<EditSeries />} />
         </Routes>
       </div>
     </>

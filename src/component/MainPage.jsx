@@ -30,7 +30,7 @@ export default function MainPage() {
 
     return (
         <div className="main-page-container">
-            <h1 style={{ color: '#692748', marginBottom: 32 }}>所有盲盒系列</h1>
+            <h1 style={{ color: '#692748', marginBottom: 32 }}>在售系列</h1>
             {loading && <div>加载中...</div>}
             {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}>
