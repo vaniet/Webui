@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function TopMessage({ message, type, onClose }) {
   React.useEffect(() => {
@@ -13,11 +14,12 @@ function TopMessage({ message, type, onClose }) {
   );
 }
 
-const LoginForm = ({ onGoRegister }) => {
+const LoginForm = () => {
   const [fields, setFields] = useState({ username: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
   const [msgType, setMsgType] = useState('success');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,6 +45,11 @@ const LoginForm = ({ onGoRegister }) => {
         // 保存token和用户id到localStorage
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('userId', data.data.user.userId);
+        // 登录成功后跳转到主页面
+        setTimeout(() => {
+          setMsg('');
+          navigate('/mainpage', { replace: true });
+        }, 1200);
       } else {
         setMsgType('error');
         setMsg(`登陆失败，${data.message}`);
@@ -85,7 +92,7 @@ const LoginForm = ({ onGoRegister }) => {
         <div style={{ position: 'absolute', right: 0, bottom: -32 }}>
           <span
             style={{ color: '#1890ff', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}
-            onClick={onGoRegister}
+            onClick={() => navigate('/register')}
           >
             去注册
           </span>

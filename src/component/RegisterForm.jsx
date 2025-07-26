@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const passwordValid = (pwd) => {
   if (pwd.length < 8) return false;
@@ -9,7 +10,7 @@ const passwordValid = (pwd) => {
   return types >= 2;
 };
 
-const RegisterForm = ({ onGoLogin }) => {
+const RegisterForm = () => {
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,7 @@ const RegisterForm = ({ onGoLogin }) => {
   });
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef();
+  const navigate = useNavigate();
 
   const validate = (name, value, allFields = fields) => {
     switch (name) {
@@ -67,7 +69,7 @@ const RegisterForm = ({ onGoLogin }) => {
       if (avatarFile) {
         const formData = new FormData();
         formData.append('file', avatarFile);
-        formData.append('type', 'avatar');
+        formData.append('type', 'series/styles/avatar');
         formData.append('name', fields.username);
         const uploadRes = await fetch('http://localhost:7001/upload/', {
           method: 'POST',
@@ -95,7 +97,7 @@ const RegisterForm = ({ onGoLogin }) => {
       setSuccess('注册成功！请前往登录');
       setTimeout(() => {
         setSuccess('');
-        onGoLogin && onGoLogin();
+        navigate('/login');
       }, 1500);
     } catch (err) {
       setErrors((prev) => ({ ...prev, submit: err.message || '注册失败' }));
@@ -175,7 +177,7 @@ const RegisterForm = ({ onGoLogin }) => {
       <div style={{ position: 'absolute', right: 0, bottom: -32 }}>
         <span
           style={{ color: '#1890ff', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}
-          onClick={onGoLogin}
+          onClick={() => navigate('/login')}
         >
           去登录
         </span>
