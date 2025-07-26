@@ -51,53 +51,57 @@ export default function Series() {
     const imageUrl = `http://localhost:7001/${series.cover}`;
 
     return (
-        <div className="series-detail-container">
-            {/* 系列头部信息 */}
-            <div className="series-header">
-                <div className="series-title">{series.name}</div>
-                <div className="series-subtitle">{series.description}</div>
-            </div>
+        <>
+            <div className="fullscreen-gradient-bg" style={{ padding: '20px', height: 'auto', overflow: 'auto' }}>
+                <div style={{ maxWidth: '700px', margin: '0 auto', background: 'white', borderRadius: '12px', padding: '32px 16px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', marginBottom: '20px' }}>
+                    {/* 系列头部信息 */}
+                    <div className="series-header">
+                        <div className="series-title">{series.name}</div>
+                        <div className="series-subtitle">{series.description}</div>
+                    </div>
 
-            {/* 系列封面 */}
-            <div className="series-cover-container">
-                <img src={imageUrl} alt={series.name} className="series-cover-image" />
-            </div>
+                    {/* 系列封面 */}
+                    <div className="series-cover-container">
+                        <img src={imageUrl} alt={series.name} className="series-cover-image" />
+                    </div>
 
-            {/* 系列细节 */}
-            {series.detail && (
-                <div className="series-detail-section">
-                    <h3 className="section-title">系列详情</h3>
-                    <div className="series-detail-text">{series.detail}</div>
-                </div>
-            )}
+                    {/* 系列细节 */}
+                    {series.detail && (
+                        <div className="series-detail-section">
+                            <h3 className="section-title">系列详情</h3>
+                            <div className="series-detail-text">{series.detail}</div>
+                        </div>
+                    )}
 
-            {/* 系列款式 */}
-            {series.styles && series.styles.length > 0 && (
-                <div className="series-styles-section">
-                    <h3 className="section-title">系列款式</h3>
-                    <div className="series-styles-grid">
-                        {series.styles.map(style => (
-                            <div key={style.id} className={`style-card ${style.isHidden ? 'hidden-style' : ''}`}>
-                                <div className="style-image-container">
-                                    <img src={`http://localhost:7001/${style.cover}`} alt={style.name} className="style-image" />
-                                    {style.isHidden && <div className="hidden-badge">隐藏款</div>}
-                                </div>
-                                <div className="style-info">
-                                    <div className="style-name">{style.name}</div>
-                                    <div className="style-description">{style.description}</div>
-                                </div>
+                    {/* 系列款式 */}
+                    {series.styles && series.styles.length > 0 && (
+                        <div className="series-styles-section">
+                            <h3 className="section-title">系列款式</h3>
+                            <div className="series-styles-grid">
+                                {series.styles.map(style => (
+                                    <div key={style.id} className={`style-card ${style.isHidden ? 'hidden-style' : ''}`}>
+                                        <div className="style-image-container">
+                                            <img src={`http://localhost:7001/${style.cover}`} alt={style.name} className="style-image" />
+                                            {style.isHidden && <div className="hidden-badge">隐藏款</div>}
+                                        </div>
+                                        <div className="style-info">
+                                            <div className="style-name">{style.name}</div>
+                                            <div className="style-description">{style.description}</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
+                    )}
+
+                    {/* 抽取按钮 */}
+                    <div className="series-action-section">
+                        <button className="draw-button">
+                            <span className="draw-text">开始抽取</span>
+                        </button>
                     </div>
                 </div>
-            )}
-
-            {/* 抽取按钮 */}
-            <div className="series-action-section">
-                <button className="draw-button">
-                    <span className="draw-text">开始抽取</span>
-                </button>
             </div>
-        </div>
+        </>
     );
 } 

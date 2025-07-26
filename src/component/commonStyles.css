@@ -379,23 +379,26 @@
 }
 
 .app-content {
-  position: relative;
   min-height: 100vh;
-  z-index: 1;
+  width: 100vw;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  /* 水平居中 */
   align-items: center;
-  width: 100%;
+  /* 垂直居中 */
+  position: relative;
+  z-index: 1;
 }
 
 .main-container {
   max-width: 400px;
-  margin: 40px auto 0 auto;
-  padding: 32px 16px;
-  width: auto;
+  width: 100%;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 32px 16px;
+  margin: 0;
+  /* 不需要auto，交给父容器flex居中 */
 }
 
 .main-page-container {
@@ -487,7 +490,6 @@
 .series-header {
   text-align: center;
   margin-bottom: 32px;
-  padding: 0 20px;
 }
 
 .series-title {
@@ -529,7 +531,6 @@
 
 .series-detail-section {
   margin-bottom: 40px;
-  padding: 0 20px;
 }
 
 .section-title {
@@ -567,15 +568,12 @@
 
 .series-styles-section {
   margin-bottom: 40px;
-  padding: 0 20px;
 }
 
 .series-styles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 24px;
-  max-width: 800px;
-  margin: 0 auto;
 }
 
 .style-card {
@@ -651,7 +649,6 @@
 .series-action-section {
   text-align: center;
   margin-bottom: 40px;
-  padding: 0 20px;
 }
 
 .draw-button {

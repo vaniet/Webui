@@ -119,70 +119,72 @@ const RegisterForm = () => {
   };
 
   return (
-    <form className="form-container" onSubmit={handleSubmit} style={{ position: 'relative' }}>
-      {/* 用户名 */}
-      <div className="form-group">
-        <label>用户名</label>
-        {errors.username && <div className="error-message">{errors.username}</div>}
-        <input type="text" name="username" className="input-field" placeholder="请输入用户名" value={fields.username} onChange={handleChange} />
-      </div>
-
-      {/* 密码 */}
-      <div className="form-group">
-        <label>密码</label>
-        {errors.password && <div className="error-message">{errors.password}</div>}
-        <input type="password" name="password" className="input-field" placeholder="请输入密码" value={fields.password} onChange={handleChange} />
-      </div>
-
-      {/* 确认密码 */}
-      <div className="form-group">
-        <label>确认密码</label>
-        {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
-        <input type="password" name="confirmPassword" className="input-field" placeholder="请再次输入密码" value={fields.confirmPassword} onChange={handleChange} />
-      </div>
-
-      {/* 手机号 */}
-      <div className="form-group">
-        <label>手机号</label>
-        {errors.phone && <div className="error-message">{errors.phone}</div>}
-        <input type="tel" name="phone" className="input-field" placeholder="请输入手机号" value={fields.phone} onChange={handleChange} />
-      </div>
-
-      {/* 上传头像 */}
-      <div className="form-group">
-        <label>上传头像</label>
-        <div
-          className="upload-image-box"
-          onClick={() => fileInputRef.current && fileInputRef.current.click()}
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="头像预览" />
-          ) : (
-            <span className="upload-plus">+</span>
-          )}
-          <input
-            type="file"
-            name="avatar"
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={handleImageChange}
-          />
+    <div className="main-container">
+      <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+        {/* 用户名 */}
+        <div className="form-group">
+          <label>用户名</label>
+          {errors.username && <div className="error-message">{errors.username}</div>}
+          <input type="text" name="username" className="input-field" placeholder="请输入用户名" value={fields.username} onChange={handleChange} />
         </div>
-      </div>
 
-      {errors.submit && <div className="error-message">{errors.submit}</div>}
-      {success && <div style={{ color: 'green', fontSize: 14, marginTop: 8 }}>{success}</div>}
+        {/* 密码 */}
+        <div className="form-group">
+          <label>密码</label>
+          {errors.password && <div className="error-message">{errors.password}</div>}
+          <input type="password" name="password" className="input-field" placeholder="请输入密码" value={fields.password} onChange={handleChange} />
+        </div>
 
-      <button type="submit" className="button" disabled={loading || Object.values(errors).some(Boolean)}>{loading ? '注册中...' : '注册'}</button>
-      <div style={{ position: 'absolute', right: 0, bottom: -32 }}>
-        <span
-          style={{ color: '#1890ff', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}
-          onClick={() => navigate('/login')}
-        >
-          去登录
-        </span>
-      </div>
-    </form>
+        {/* 确认密码 */}
+        <div className="form-group">
+          <label>确认密码</label>
+          {errors.confirmPassword && <div className="error-message">{errors.confirmPassword}</div>}
+          <input type="password" name="confirmPassword" className="input-field" placeholder="请再次输入密码" value={fields.confirmPassword} onChange={handleChange} />
+        </div>
+
+        {/* 手机号 */}
+        <div className="form-group">
+          <label>手机号</label>
+          {errors.phone && <div className="error-message">{errors.phone}</div>}
+          <input type="tel" name="phone" className="input-field" placeholder="请输入手机号" value={fields.phone} onChange={handleChange} />
+        </div>
+
+        {/* 上传头像 */}
+        <div className="form-group">
+          <label>上传头像</label>
+          <div
+            className="upload-image-box"
+            onClick={() => fileInputRef.current && fileInputRef.current.click()}
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="头像预览" />
+            ) : (
+              <span className="upload-plus">+</span>
+            )}
+            <input
+              type="file"
+              name="avatar"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+            />
+          </div>
+        </div>
+
+        {errors.submit && <div className="error-message">{errors.submit}</div>}
+        {success && <div style={{ color: 'green', fontSize: 14, marginTop: 8 }}>{success}</div>}
+
+        <button type="submit" className="button" disabled={loading || Object.values(errors).some(Boolean)}>{loading ? '注册中...' : '注册'}</button>
+        <div style={{ textAlign: 'right', marginTop: 16 }}>
+          <span
+            style={{ color: '#1890ff', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}
+            onClick={() => navigate('/login')}
+          >
+            去登录
+          </span>
+        </div>
+      </form>
+    </div>
   );
 };
 

@@ -42,10 +42,8 @@ const LoginForm = () => {
       if (data.code === 200) {
         setMsgType('success');
         setMsg(`登陆成功，${data.data.user.username}`);
-        // 保存token和用户id到localStorage
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('userId', data.data.user.userId);
-        // 登录成功后跳转到主页面
         setTimeout(() => {
           setMsg('');
           navigate('/mainpage', { replace: true });
@@ -65,39 +63,41 @@ const LoginForm = () => {
   return (
     <>
       <TopMessage message={msg} type={msgType} onClose={() => setMsg('')} />
-      <form className="form-container" onSubmit={handleSubmit} style={{ position: 'relative' }}>
-      <div className="form-group">
-        <label>用户名</label>
-          <input
-            type="text"
-            name="username"
-            className="input-field"
-            placeholder="请输入用户名"
-            value={fields.username}
-            onChange={handleChange}
-          />
+      <div className="main-container">
+        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+          <div className="form-group">
+            <label>用户名</label>
+            <input
+              type="text"
+              name="username"
+              className="input-field"
+              placeholder="请输入用户名"
+              value={fields.username}
+              onChange={handleChange}
+            />
+          </div>
+          <div className="form-group">
+            <label>密码</label>
+            <input
+              type="password"
+              name="password"
+              className="input-field"
+              placeholder="请输入密码"
+              value={fields.password}
+              onChange={handleChange}
+            />
+          </div>
+          <button type="submit" className="button" disabled={loading}>{loading ? '登录中...' : '登录'}</button>
+          <div style={{ textAlign: 'right', marginTop: 16 }}>
+            <span
+              style={{ color: '#1890ff', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}
+              onClick={() => navigate('/register')}
+            >
+              去注册
+            </span>
+          </div>
+        </form>
       </div>
-      <div className="form-group">
-        <label>密码</label>
-          <input
-            type="password"
-            name="password"
-            className="input-field"
-            placeholder="请输入密码"
-            value={fields.password}
-            onChange={handleChange}
-          />
-        </div>
-        <button type="submit" className="button" disabled={loading}>{loading ? '登录中...' : '登录'}</button>
-        <div style={{ position: 'absolute', right: 0, bottom: -32 }}>
-          <span
-            style={{ color: '#1890ff', textDecoration: 'underline', cursor: 'pointer', fontSize: 14 }}
-            onClick={() => navigate('/register')}
-          >
-            去注册
-          </span>
-      </div>
-    </form>
     </>
   );
 };
