@@ -252,3 +252,31 @@
 .upload-image-box input[type="file"] {
   display: none;
 }
+
+.top-message {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  min-width: 200px;
+  max-width: 80vw;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #fff;
+  background: #333;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  opacity: 0.96;
+  text-align: center;
+  pointer-events: none;
+  transition: top 0.3s, opacity 0.3s;
+}
+
+.top-message-success {
+  background: linear-gradient(90deg, #4caf50, #8bc34a);
+}
+
+.top-message-error {
+  background: linear-gradient(90deg, #ff3860, #ffb6b9);
+}
