@@ -9,10 +9,11 @@ import Series from "./component/Series.jsx";
 import EditSeries from "./component/EditSeries.jsx";
 import Dashboard from "./component/Dashboard.jsx";
 import Header from "./component/Header.jsx";
+import { UserProvider } from './contexts/UserContext';
 
 const App = () => {
   return (
-    <>
+    <UserProvider>
       <div className="fullscreen-gradient-bg"></div>
       <Header />
       <div className="app-content" style={{ paddingTop: '60px' }}>
@@ -26,8 +27,8 @@ const App = () => {
           <Route path="/editseries" element={<EditSeries />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
-    </div>
-    </>
+      </div>
+    </UserProvider>
   );
 };
 

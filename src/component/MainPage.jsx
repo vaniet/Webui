@@ -29,7 +29,7 @@ export default function MainPage() {
     }, []);
 
     return (
-        <div className="main-page-container">
+        <div className="main-page-container" style={{ paddingTop: '20px' }}>
             <h1 style={{ color: '#692748', marginBottom: 32 }}>在售系列</h1>
             {loading && <div>加载中...</div>}
             {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}

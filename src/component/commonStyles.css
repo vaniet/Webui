@@ -384,8 +384,8 @@
   display: flex;
   justify-content: center;
   /* 水平居中 */
-  align-items: center;
-  /* 垂直居中 */
+  align-items: flex-start;
+  /* 从顶部开始对齐，避免与Header重叠 */
   position: relative;
   z-index: 1;
 }
@@ -403,7 +403,7 @@
 
 .main-page-container {
   max-width: 1200px;
-  margin: 40px auto 0 auto;
+  margin: 80px auto 0 auto;
   padding: 32px 16px;
   width: auto;
 }
