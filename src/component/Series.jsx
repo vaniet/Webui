@@ -78,7 +78,14 @@ export default function Series() {
                         <div className="series-styles-section">
                             <h3 className="section-title">系列款式</h3>
                             <div className="series-styles-grid">
-                                {series.styles.map(style => (
+                                {series.styles
+                                    .sort((a, b) => {
+                                        // 隐藏款排在最后
+                                        if (a.isHidden && !b.isHidden) return 1;
+                                        if (!a.isHidden && b.isHidden) return -1;
+                                        return 0;
+                                    })
+                                    .map(style => (
                                     <div key={style.id} className={`style-card ${style.isHidden ? 'hidden-style' : ''}`}>
                                         <div className="style-image-container">
                                             <img src={`http://localhost:7001/${style.cover}`} alt={style.name} className="style-image" />

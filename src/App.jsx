@@ -22,7 +22,7 @@ const App = () => {
           <Route path="/series/:id" element={<Series />} />
           <Route path="/editseries" element={<EditSeries />} />
         </Routes>
-      </div>
+    </div>
     </>
   );
 };

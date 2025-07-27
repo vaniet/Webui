@@ -65,8 +65,8 @@ const LoginForm = () => {
       <TopMessage message={msg} type={msgType} onClose={() => setMsg('')} />
       <div className="main-container">
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <div className="form-group">
-            <label>用户名</label>
+      <div className="form-group">
+        <label>用户名</label>
             <input
               type="text"
               name="username"
@@ -75,9 +75,9 @@ const LoginForm = () => {
               value={fields.username}
               onChange={handleChange}
             />
-          </div>
-          <div className="form-group">
-            <label>密码</label>
+      </div>
+      <div className="form-group">
+        <label>密码</label>
             <input
               type="password"
               name="password"
