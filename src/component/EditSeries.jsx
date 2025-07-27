@@ -249,24 +249,7 @@ const EditSeries = () => {
             <TopMessage message={msg} type={msgType} onClose={() => setMsg('')} />
             <div className="fullscreen-gradient-bg" style={{ padding: '20px', height: 'auto', overflow: 'auto' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto', background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
-                    {/* 返回主界面按钮 */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <button
-                            type="button"
-                            onClick={() => navigate('/mainpage')}
-                            style={{
-                                padding: '8px 16px',
-                                border: '1px solid #1890ff',
-                                borderRadius: '5px',
-                                background: 'white',
-                                color: '#1890ff',
-                                cursor: 'pointer',
-                                fontSize: '14px'
-                            }}
-                        >
-                            返回主界面
-                        </button>
-                    </div>
+
 
                     <h1 style={{ textAlign: 'center', marginBottom: '32px', color: '#692748' }}>系列管理</h1>
 

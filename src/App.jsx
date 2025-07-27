@@ -7,12 +7,15 @@ import MainPage from "./component/MainPage.jsx";
 import CreateSeries from "./component/CreateSeries.jsx";
 import Series from "./component/Series.jsx";
 import EditSeries from "./component/EditSeries.jsx";
+import Dashboard from "./component/Dashboard.jsx";
+import Header from "./component/Header.jsx";
 
 const App = () => {
   return (
     <>
       <div className="fullscreen-gradient-bg"></div>
-      <div className="app-content">
+      <Header />
+      <div className="app-content" style={{ paddingTop: '60px' }}>
         <Routes>
           <Route path="/" element={<LoginForm />} />
           <Route path="/login" element={<LoginForm />} />
@@ -21,6 +24,7 @@ const App = () => {
           <Route path="/createseries" element={<CreateSeries />} />
           <Route path="/series/:id" element={<Series />} />
           <Route path="/editseries" element={<EditSeries />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
     </div>
     </>
