@@ -145,6 +145,10 @@ const DrawBox = ({ seriesId, onDrawComplete }) => {
     // 选择盲盒方块
     const selectBox = (boxIndex) => {
         setSelectedBoxIndex(boxIndex);
+        // 确保当前库存被选中
+        if (stockInfo && stockInfo[currentStockIndex]) {
+            setSelectedStockId(stockInfo[currentStockIndex].id);
+        }
     };
 
     // 切换到上一个盒子

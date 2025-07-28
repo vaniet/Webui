@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import DrawBox from './DrawBox';
 import './DrawBox.css';
+import HorizontalScrollList from './HorizontalScrollList';
 
 export default function Series() {
     const { id } = useParams();
@@ -79,7 +80,7 @@ export default function Series() {
                     {series.styles && series.styles.length > 0 && (
                         <div className="series-styles-section">
                             <h3 className="section-title">系列款式</h3>
-                            <div className="series-styles-grid">
+                            <HorizontalScrollList>
                                 {series.styles
                                     .sort((a, b) => {
                                         // 隐藏款排在最后
@@ -99,7 +100,7 @@ export default function Series() {
                                             </div>
                                         </div>
                                     ))}
-                            </div>
+                            </HorizontalScrollList>
                         </div>
                     )}
 

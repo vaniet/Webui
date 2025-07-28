@@ -56,7 +56,35 @@ const OrderDetails = () => {
 
             const data = await res.json();
             if (data.code === 200) {
-                setOrders(data.data.purchases || []);
+                // 获取订单ID列表
+                const purchaseIds = data.data.purchaseIds || [];
+
+                // 为每个订单ID获取详细信息
+                const orderPromises = purchaseIds.map(async (orderId) => {
+                    try {
+                        const detailRes = await fetch(`http://localhost:7001/purchase/${orderId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (detailRes.ok) {
+                            const detailData = await detailRes.json();
+                            if (detailData.code === 200) {
+                                return detailData.data;
+                            }
+                        }
+                        return null;
+                    } catch (err) {
+                        console.error(`获取订单 ${orderId} 详情失败:`, err);
+                        return null;
+                    }
+                });
+
+                const orderDetails = await Promise.all(orderPromises);
+                const validOrders = orderDetails.filter(order => order !== null);
+                setOrders(validOrders);
             } else {
                 setError(data.message || '获取订单信息失败');
             }
@@ -137,7 +165,8 @@ const OrderDetails = () => {
         const statusMap = {
             'pending': '待发货',
             'shipped': '已发货',
-            'delivered': '已收货'
+            'delivered': '已收货',
+            'cancelled': '已取消'
         };
         return statusMap[status] || status;
     };
@@ -147,7 +176,8 @@ const OrderDetails = () => {
         const colorMap = {
             'pending': '#ffb600',
             'shipped': '#1890ff',
-            'delivered': '#52c41a'
+            'delivered': '#52c41a',
+            'cancelled': '#ff4d4f'
         };
         return colorMap[status] || '#666';
     };
@@ -163,7 +193,8 @@ const OrderDetails = () => {
         all: orders.length,
         pending: orders.filter(order => order.shippingStatus === 'pending').length,
         shipped: orders.filter(order => order.shippingStatus === 'shipped').length,
-        delivered: orders.filter(order => order.shippingStatus === 'delivered').length
+        delivered: orders.filter(order => order.shippingStatus === 'delivered').length,
+        cancelled: orders.filter(order => order.shippingStatus === 'cancelled').length
     };
 
     useEffect(() => {
@@ -205,7 +236,8 @@ const OrderDetails = () => {
                             { key: 'all', label: '全部' },
                             { key: 'pending', label: '待发货' },
                             { key: 'shipped', label: '已发货' },
-                            { key: 'delivered', label: '已收货' }
+                            { key: 'delivered', label: '已收货' },
+                            { key: 'cancelled', label: '已取消' }
                         ].map(status => (
                             <button
                                 key={status.key}
