@@ -91,8 +91,8 @@ export default function Series() {
                                         <div key={style.id} className={`style-card ${style.isHidden ? 'hidden-style' : ''}`}>
                                             <div className="style-image-container">
                                                 <img src={`http://localhost:7001/${style.cover}`} alt={style.name} className="style-image" />
-                                                {style.isHidden && <div className="hidden-badge">隐藏款</div>}
                                             </div>
+                                            {style.isHidden && <div className="hidden-badge">隐藏款</div>}
                                             <div className="style-info">
                                                 <div className="style-name">{style.name}</div>
                                                 <div className="style-description">{style.description}</div>
@@ -104,8 +104,8 @@ export default function Series() {
                     )}
 
                     {/* 抽盒组件 */}
-                    <DrawBox 
-                        seriesId={id} 
+                    <DrawBox
+                        seriesId={id}
                         onDrawComplete={(result) => {
                             console.log('抽卡完成:', result);
                         }}

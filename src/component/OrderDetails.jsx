@@ -239,7 +239,7 @@ const OrderDetails = () => {
                                         </div>
                                         <div className="order-content">
                                             <div className="order-images">
-                                                <div className="style-image">
+                                                <div className="order-style-image">
                                                     <img
                                                         src={`http://localhost:7001/${order.styleCover}`}
                                                         alt={order.styleName}
