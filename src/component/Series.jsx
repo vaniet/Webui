@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import DrawBox from './DrawBox';
+import './DrawBox.css';
 
 export default function Series() {
     const { id } = useParams();
@@ -86,27 +88,28 @@ export default function Series() {
                                         return 0;
                                     })
                                     .map(style => (
-                                    <div key={style.id} className={`style-card ${style.isHidden ? 'hidden-style' : ''}`}>
-                                        <div className="style-image-container">
-                                            <img src={`http://localhost:7001/${style.cover}`} alt={style.name} className="style-image" />
-                                            {style.isHidden && <div className="hidden-badge">隐藏款</div>}
+                                        <div key={style.id} className={`style-card ${style.isHidden ? 'hidden-style' : ''}`}>
+                                            <div className="style-image-container">
+                                                <img src={`http://localhost:7001/${style.cover}`} alt={style.name} className="style-image" />
+                                                {style.isHidden && <div className="hidden-badge">隐藏款</div>}
+                                            </div>
+                                            <div className="style-info">
+                                                <div className="style-name">{style.name}</div>
+                                                <div className="style-description">{style.description}</div>
+                                            </div>
                                         </div>
-                                        <div className="style-info">
-                                            <div className="style-name">{style.name}</div>
-                                            <div className="style-description">{style.description}</div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
                         </div>
                     )}
 
-                    {/* 抽取按钮 */}
-                    <div className="series-action-section">
-                        <button className="draw-button">
-                            <span className="draw-text">开始抽取</span>
-                        </button>
-                    </div>
+                    {/* 抽盒组件 */}
+                    <DrawBox 
+                        seriesId={id} 
+                        onDrawComplete={(result) => {
+                            console.log('抽卡完成:', result);
+                        }}
+                    />
                 </div>
             </div>
         </>
