@@ -1,0 +1,494 @@
+/* 订单详情页样式 */
+.order-details-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 状态筛选 */
+.status-filter {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.status-filter-btn {
+    padding: 10px 20px;
+    border: 2px solid #e8e8e8;
+    border-radius: 25px;
+    background: white;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.status-filter-btn:hover {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+}
+
+.status-filter-btn.active {
+    background: var(--primary-pink);
+    border-color: var(--primary-pink);
+    color: white;
+}
+
+/* 订单列表 */
+.orders-container {
+    margin-top: 24px;
+}
+
+.orders-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 8px 8px 0 8px;
+}
+
+/* 订单卡片 */
+.order-card {
+    background: white;
+    border-radius: 14px;
+    padding: 24px 12px 24px 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    max-width: 260px;
+    min-height: 220px;
+    margin: 0 auto;
+}
+
+.order-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-pink);
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-id {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.order-status {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.order-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-images {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+.series-image,
+.style-image {
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.series-image img,
+.style-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.fallback-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.order-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.series-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.style-name {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    font-weight: 600;
+}
+
+.hidden-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff3860, #ff6b9d);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.purchase-time {
+    font-size: 12px;
+    color: #999;
+    margin-top: auto;
+    text-align: center;
+}
+
+/* 无订单状态 */
+.no-orders {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.no-orders-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.no-orders-text {
+    font-size: 16px;
+}
+
+/* 详情弹窗 */
+.detail-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.detail-modal {
+    background: white;
+    border-radius: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.detail-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 0 24px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 24px;
+}
+
+.detail-modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.close-detail-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-detail-btn:hover {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.detail-modal-content {
+    padding: 0 24px 24px 24px;
+}
+
+.detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+    color: #666;
+}
+
+.detail-error {
+    text-align: center;
+    padding: 40px;
+    color: #ff4d4f;
+    font-size: 16px;
+}
+
+/* 订单详情内容 */
+.order-detail-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.detail-section {
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 20px;
+}
+
+.detail-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-pink);
+    display: inline-block;
+}
+
+.detail-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.detail-info-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    width: 100%;
+}
+
+.detail-label {
+    text-align: left;
+    flex: 1;
+    min-width: 80px;
+}
+
+.detail-value {
+    text-align: right;
+    flex: 1;
+    min-width: 80px;
+}
+
+.detail-info-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+}
+
+/* 商品详情 */
+.product-detail {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.product-images {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.product-series-image,
+.product-style-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-series-image img,
+.product-style-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.product-series-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+}
+
+.product-style-name {
+    font-size: 16px;
+    color: #666;
+}
+
+.product-description {
+    font-size: 14px;
+    color: #999;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1280px) {
+    .orders-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .status-filter {
+        gap: 8px;
+    }
+
+    .status-filter-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+        min-width: 80px;
+    }
+
+    .orders-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .order-card {
+        padding: 16px;
+        max-width: 100%;
+    }
+
+    .order-content {
+        gap: 12px;
+    }
+
+    .series-image,
+    .style-image {
+        width: 50px;
+        height: 50px;
+    }
+
+    .detail-modal {
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    .detail-modal-header {
+        padding: 20px 20px 0 20px;
+    }
+
+    .detail-modal-content {
+        padding: 0 20px 20px 20px;
+    }
+
+    .detail-info-grid {
+        flex-direction: column;
+    }
+
+    .product-detail {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .product-images {
+        justify-content: center;
+    }
+
+    .product-series-image,
+    .product-style-image {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 768px) {
+    .orders-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .order-card {
+        padding: 16px;
+        max-width: 100%;
+        min-height: unset;
+    }
+
+    .style-image {
+        width: 60px;
+        height: 60px;
+    }
+}

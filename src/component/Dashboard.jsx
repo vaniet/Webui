@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
+import { useEffect } from 'react';
 
 function TopMessage({ message, type, onClose }) {
     React.useEffect(() => {
@@ -20,6 +21,9 @@ function TopMessage({ message, type, onClose }) {
 const Dashboard = () => {
     const [msg, setMsg] = useState('');
     const [msgType, setMsgType] = useState('success');
+    const [orderStats, setOrderStats] = useState(null);
+    const [orderLoading, setOrderLoading] = useState(true);
+    const [orderError, setOrderError] = useState('');
     const navigate = useNavigate();
     const { user, loading, error, logout, refreshUser } = useUser();
 
@@ -45,6 +49,44 @@ const Dashboard = () => {
         };
         return roleMap[role] || role;
     };
+
+    // 获取订单统计信息
+    useEffect(() => {
+        const fetchOrderStats = async () => {
+            setOrderLoading(true);
+            setOrderError('');
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setOrderError('请先登录');
+                    setOrderLoading(false);
+                    return;
+                }
+                const res = await fetch('http://localhost:7001/purchase/stats/my', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (res.status === 401) {
+                    setOrderError('登录已过期，请重新登录');
+                    setOrderLoading(false);
+                    return;
+                }
+                const data = await res.json();
+                if (data.code === 200) {
+                    setOrderStats(data.data);
+                } else {
+                    setOrderError(data.message || '获取订单信息失败');
+                }
+            } catch (err) {
+                setOrderError('网络错误，无法获取订单信息');
+            } finally {
+                setOrderLoading(false);
+            }
+        };
+        fetchOrderStats();
+    }, []);
 
     if (loading) return (
         <div className="main-container">
@@ -77,16 +119,19 @@ const Dashboard = () => {
 
                     {user ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                            {/* 头像和基本信息 */}
+                            {/* 头像、基本信息和时间信息合并卡片 */}
                             <div style={{
                                 display: 'flex',
-                                alignItems: 'center',
+                                flexDirection: 'row',
                                 gap: '24px',
                                 padding: '24px',
                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                                 borderRadius: '12px',
-                                color: 'white'
+                                color: 'white',
+                                flexWrap: 'wrap',
+                                alignItems: 'stretch'
                             }}>
+                                {/* 头像 */}
                                 <div style={{
                                     width: '80px',
                                     height: '80px',
@@ -96,7 +141,8 @@ const Dashboard = () => {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     fontSize: '32px',
-                                    fontWeight: 'bold'
+                                    fontWeight: 'bold',
+                                    flexShrink: 0
                                 }}>
                                     {user.avatar ? (
                                         <img
@@ -108,101 +154,83 @@ const Dashboard = () => {
                                         user.username.charAt(0).toUpperCase()
                                     )}
                                 </div>
-                                <div>
+                                {/* 基本信息（左侧） */}
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1, justifyContent: 'center' }}>
                                     <h2 style={{ margin: '0 0 8px', fontSize: '24px' }}>{user.username}</h2>
                                     <div style={{
                                         display: 'inline-block',
                                         padding: '4px 12px',
                                         background: 'rgba(255,255,255,0.2)',
                                         borderRadius: '20px',
-                                        fontSize: '14px'
+                                        fontSize: '14px',
+                                        marginBottom: '8px',
+                                        width: 'fit-content'
                                     }}>
                                         {getRoleDisplayName(user.role)}
                                     </div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+                                        <div style={{ color: '#fff', fontSize: '14px' }}>用户ID: <span style={{ color: '#fff', fontWeight: '500' }}>{user.userId}</span></div>
+                                        <div style={{ color: '#fff', fontSize: '14px' }}>手机号码: <span style={{ color: '#fff', fontWeight: '500' }}>{user.phone || '未设置'}</span></div>
+                                    </div>
+                                </div>
+                                {/* 时间信息（右侧红框区域） */}
+                                <div style={{
+                                    minWidth: '180px',
+                                    maxWidth: '220px',
+                                    background: 'rgba(255,255,255,0.08)',
+                                    borderRadius: '10px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-start',
+                                    padding: '18px 20px',
+                                    marginLeft: 'auto',
+                                    boxSizing: 'border-box',
+                                    border: '1.5px solid rgba(255,255,255,0.18)'
+                                }}>
+                                    <div style={{ color: '#fff', fontSize: '14px', marginBottom: '10px' }}>注册时间: <span style={{ color: '#fff', fontWeight: '500', fontSize: '13px' }}>{formatDate(user.createdAt)}</span></div>
+                                    <div style={{ color: '#fff', fontSize: '14px', marginBottom: '10px' }}>最后更新: <span style={{ color: '#fff', fontWeight: '500', fontSize: '13px' }}>{formatDate(user.updatedAt)}</span></div>
+
                                 </div>
                             </div>
-
-                            {/* 详细信息 */}
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-                                {/* 基本信息卡片 */}
-                                <div style={{
+                            {/* 订单统计信息卡片 */}
+                            <div
+                                style={{
                                     border: '1px solid #e8e8e8',
                                     borderRadius: '8px',
                                     padding: '20px',
-                                    background: '#fafafa'
-                                }}>
-                                    <h3 style={{ margin: '0 0 16px', color: '#333', fontSize: '16px', borderBottom: '2px solid #1890ff', paddingBottom: '8px' }}>
-                                        基本信息
-                                    </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>用户ID:</span>
-                                            <span style={{ color: '#333', fontWeight: '500' }}>{user.userId}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>用户名:</span>
-                                            <span style={{ color: '#333', fontWeight: '500' }}>{user.username}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>用户角色:</span>
-                                            <span style={{
-                                                color: '#1890ff',
-                                                fontWeight: '500',
-                                                padding: '2px 8px',
-                                                background: '#e6f7ff',
-                                                borderRadius: '4px'
-                                            }}>
-                                                {getRoleDisplayName(user.role)}
-                                            </span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>手机号码:</span>
-                                            <span style={{ color: '#333', fontWeight: '500' }}>
-                                                {user.phone || '未设置'}
-                                            </span>
-                                        </div>
+                                    background: '#fafafa',
+                                    minHeight: '120px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'flex-start',
+                                    cursor: 'pointer',
+                                    transition: 'box-shadow 0.2s',
+                                    boxShadow: '0 2px 8px rgba(255,182,0,0.05)'
+                                }}
+                                onClick={() => navigate('/orders')}
+                                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(255,182,0,0.15)'}
+                                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(255,182,0,0.05)'}
+                            >
+                                <h3 style={{ margin: '0 0 16px', color: '#333', fontSize: '16px', borderBottom: '2px solid #ffb600', paddingBottom: '8px' }}>
+                                    订单统计
+                                </h3>
+                                {orderLoading ? (
+                                    <div style={{ color: '#999' }}>加载中...</div>
+                                ) : orderError ? (
+                                    <div style={{ color: 'red' }}>{orderError}</div>
+                                ) : orderStats ? (
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', fontSize: '15px' }}>
+                                        <div>全部订单：<span style={{ color: '#ffb600', fontWeight: 'bold' }}>{orderStats.total}</span></div>
+                                        <div>待发货：<span style={{ color: '#1890ff', fontWeight: 'bold' }}>{orderStats.pending}</span></div>
+                                        <div>已发货：<span style={{ color: '#52c41a', fontWeight: 'bold' }}>{orderStats.shipped}</span></div>
+                                        <div>已收货：<span style={{ color: '#764ba2', fontWeight: 'bold' }}>{orderStats.delivered}</span></div>
                                     </div>
-                                </div>
-
-                                {/* 时间信息卡片 */}
-                                <div style={{
-                                    border: '1px solid #e8e8e8',
-                                    borderRadius: '8px',
-                                    padding: '20px',
-                                    background: '#fafafa'
-                                }}>
-                                    <h3 style={{ margin: '0 0 16px', color: '#333', fontSize: '16px', borderBottom: '2px solid #52c41a', paddingBottom: '8px' }}>
-                                        时间信息
-                                    </h3>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>注册时间:</span>
-                                            <span style={{ color: '#333', fontWeight: '500', fontSize: '13px' }}>
-                                                {formatDate(user.createdAt)}
-                                            </span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>最后更新:</span>
-                                            <span style={{ color: '#333', fontWeight: '500', fontSize: '13px' }}>
-                                                {formatDate(user.updatedAt)}
-                                            </span>
-                                        </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            <span style={{ color: '#666', fontSize: '14px' }}>账号状态:</span>
-                                            <span style={{
-                                                color: '#52c41a',
-                                                fontWeight: '500',
-                                                padding: '2px 8px',
-                                                background: '#f6ffed',
-                                                borderRadius: '4px'
-                                            }}>
-                                                正常
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                                ) : (
+                                    <div style={{ color: '#999' }}>暂无订单数据</div>
+                                )}
                             </div>
-
                             {/* 操作按钮 */}
                             <div style={{
                                 display: 'flex',

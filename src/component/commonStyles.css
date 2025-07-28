@@ -578,10 +578,9 @@ body {
   line-height: 1.8;
   text-align: justify;
   white-space: pre-line;
-  background: #f8f9fa;
-  padding: 24px;
-  border-radius: 12px;
-  border-left: 4px solid var(--primary-pink);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
 .series-styles-section {
@@ -728,6 +727,11 @@ body {
   .draw-button {
     padding: 14px 32px;
     font-size: 16px;
+  }
+
+  .series-detail-text {
+    max-width: 100%;
+    padding: 0 16px;
   }
 }
 

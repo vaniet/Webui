@@ -125,8 +125,34 @@ const Header = () => {
                 </div>
             )}
 
-            {/* 右侧 - 个人信息按钮 */}
-            <div>
+            {/* 右侧 - 个人信息和订单按钮 */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                    onClick={() => navigate('/orders')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#ffb600',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.background = 'rgba(255, 182, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = 'none';
+                    }}
+                >
+                    <span style={{ fontSize: '18px' }}>📦</span>
+                    我的订单
+                </button>
                 <button
                     onClick={() => navigate('/dashboard')}
                     style={{

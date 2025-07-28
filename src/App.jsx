@@ -8,6 +8,7 @@ import CreateSeries from "./component/CreateSeries.jsx";
 import Series from "./component/Series.jsx";
 import EditSeries from "./component/EditSeries.jsx";
 import Dashboard from "./component/Dashboard.jsx";
+import OrderDetails from "./component/OrderDetails.jsx";
 import Header from "./component/Header.jsx";
 import { UserProvider } from './contexts/UserContext';
 
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="/series/:id" element={<Series />} />
           <Route path="/editseries" element={<EditSeries />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/orders" element={<OrderDetails />} />
         </Routes>
       </div>
     </UserProvider>
