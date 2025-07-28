@@ -9,6 +9,7 @@ import Series from "./component/Series.jsx";
 import EditSeries from "./component/EditSeries.jsx";
 import Dashboard from "./component/Dashboard.jsx";
 import OrderDetails from "./component/OrderDetails.jsx";
+import ManageOrders from "./component/ManageOrders.jsx";
 import Header from "./component/Header.jsx";
 import { UserProvider } from './contexts/UserContext';
 
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/editseries" element={<EditSeries />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/orders" element={<OrderDetails />} />
+          <Route path="/manageorders" element={<ManageOrders />} />
         </Routes>
       </div>
     </UserProvider>

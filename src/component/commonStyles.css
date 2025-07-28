@@ -400,12 +400,10 @@ body {
   display: flex;
   justify-content: center;
   /* 水平居中 */
-  align-items: flex-start;
-  /* 从顶部开始对齐，避免与Header重叠 */
+  align-items: center;
+  /* 垂直居中 */
   position: relative;
   z-index: 1;
-  padding-bottom: 80px;
-  /* 为底部内容留出更多余量 */
 }
 
 .main-container {
@@ -421,7 +419,7 @@ body {
 
 .main-page-container {
   max-width: 1200px;
-  margin: 80px auto 80px auto;
+  margin: 0 auto;
   padding: 32px 16px;
   width: auto;
 }

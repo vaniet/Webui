@@ -28,6 +28,33 @@ const OrderDetails = () => {
     const [detailLoading, setDetailLoading] = useState(false);
     const [orderDetail, setOrderDetail] = useState(null);
     const { user } = useUser();
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState(null);
+    const [confirmMessage, setConfirmMessage] = useState('');
+
+    // 显示确认弹窗
+    const showConfirm = (action, message) => {
+        setConfirmAction(() => action);
+        setConfirmMessage(message);
+        setShowConfirmModal(true);
+    };
+
+    // 确认操作
+    const handleConfirm = async () => {
+        if (confirmAction && typeof confirmAction === 'function') {
+            await confirmAction();
+        }
+        setShowConfirmModal(false);
+        setConfirmAction(null);
+        setConfirmMessage('');
+    };
+
+    // 取消确认
+    const handleCancelConfirm = () => {
+        setShowConfirmModal(false);
+        setConfirmAction(null);
+        setConfirmMessage('');
+    };
 
     // 获取订单列表
     const fetchOrders = async () => {
@@ -146,6 +173,96 @@ const OrderDetails = () => {
         setShowDetailModal(false);
         setSelectedOrder(null);
         setOrderDetail(null);
+    };
+
+    // 删除购买记录
+    const deletePurchase = (orderId) => {
+        console.log('删除按钮被点击，显示确认弹窗');
+        showConfirm(async () => {
+            console.log('用户确认删除，开始执行删除操作');
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setMsgType('error');
+                    setMsg('请先登录');
+                    return;
+                }
+
+                const res = await fetch(`http://localhost:7001/purchase/${orderId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (res.status === 401) {
+                    setMsgType('error');
+                    setMsg('登录已过期，请重新登录');
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.code === 200) {
+                    setMsgType('success');
+                    setMsg('购买记录删除成功');
+                    // 关闭弹窗并刷新订单列表
+                    closeDetailModal();
+                    fetchOrders();
+                } else {
+                    setMsgType('error');
+                    setMsg(data.message || '删除失败');
+                }
+            } catch (err) {
+                setMsgType('error');
+                setMsg('网络错误，删除失败');
+            }
+        }, '确定要删除这条购买记录吗？删除后无法恢复。');
+    };
+
+    // 取消订单
+    const cancelOrder = (orderId) => {
+        console.log('取消按钮被点击，显示确认弹窗');
+        showConfirm(async () => {
+            console.log('用户确认取消，开始执行取消操作');
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setMsgType('error');
+                    setMsg('请先登录');
+                    return;
+                }
+
+                const res = await fetch(`http://localhost:7001/purchase/${orderId}/cancel`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (res.status === 401) {
+                    setMsgType('error');
+                    setMsg('登录已过期，请重新登录');
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.code === 200) {
+                    setMsgType('success');
+                    setMsg('订单取消成功');
+                    // 关闭弹窗并刷新订单列表
+                    closeDetailModal();
+                    fetchOrders();
+                } else {
+                    setMsgType('error');
+                    setMsg(data.message || '取消订单失败');
+                }
+            } catch (err) {
+                setMsgType('error');
+                setMsg('网络错误，取消订单失败');
+            }
+        }, '确定要取消这个订单吗？取消后无法恢复。');
     };
 
     // 格式化日期
@@ -337,7 +454,7 @@ const OrderDetails = () => {
                                             <div className="product-info">
                                                 <div className="product-series-name">{orderDetail.seriesName}</div>
                                                 <div className="product-style-name">{orderDetail.styleName}</div>
-                                                {orderDetail.isHidden && <div className="hidden-badge">隐藏款</div>}
+                                                {orderDetail.isHidden && <div className="hidden-badge detail-hidden-badge">隐藏款</div>}
                                                 {orderDetail.style?.description && (
                                                     <div className="product-description">{orderDetail.style.description}</div>
                                                 )}
@@ -368,7 +485,7 @@ const OrderDetails = () => {
                                         </div>
                                     </div>
                                     {/* 物流信息 */}
-                                    {orderDetail.shippingStatus !== 'pending' && (
+                                    {orderDetail.shippingStatus !== 'pending' && orderDetail.shippingStatus !== 'cancelled' && (
                                         <div className="detail-section">
                                             <h4 className="detail-section-title">物流信息</h4>
                                             <div className="detail-info-grid">
@@ -419,10 +536,38 @@ const OrderDetails = () => {
                                             </div>
                                         </div>
                                     )}
+                                    {orderDetail.shippingStatus === 'cancelled' && (
+                                        <div className="detail-section">
+                                            <button className="delete-purchase-btn" onClick={() => deletePurchase(orderDetail.id)}>
+                                                删除购买记录
+                                            </button>
+                                        </div>
+                                    )}
+                                    {orderDetail.shippingStatus === 'pending' && (
+                                        <div className="detail-section">
+                                            <button className="cancel-order-btn" onClick={() => cancelOrder(orderDetail.id)}>
+                                                取消订单
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="detail-error">获取订单详情失败</div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 确认弹窗 */}
+            {showConfirmModal && (
+                <div className="confirm-modal-overlay" onClick={handleCancelConfirm}>
+                    <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="confirm-modal-title">确认操作</h3>
+                        <p className="confirm-modal-message">{confirmMessage}</p>
+                        <div className="confirm-modal-actions">
+                            <button className="confirm-modal-btn confirm-modal-yes" onClick={handleConfirm}>是</button>
+                            <button className="confirm-modal-btn confirm-modal-no" onClick={handleCancelConfirm}>否</button>
                         </div>
                     </div>
                 </div>

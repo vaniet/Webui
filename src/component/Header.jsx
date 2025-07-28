@@ -6,7 +6,7 @@ const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user } = useUser();
-    
+
     // 调试信息
     console.log('Header - Current user:', user);
     console.log('Header - User role:', user?.role);
@@ -121,6 +121,32 @@ const Header = () => {
                     >
                         <span style={{ fontSize: '18px' }}>⚙️</span>
                         管理盲盒
+                    </button>
+                    <button
+                        onClick={() => navigate('/manageorders')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#13c2c2',
+                            fontSize: '16px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(19, 194, 194, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = 'none';
+                        }}
+                    >
+                        <span style={{ fontSize: '18px' }}>📦</span>
+                        订单管理
                     </button>
                 </div>
             )}

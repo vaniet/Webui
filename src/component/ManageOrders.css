@@ -1,0 +1,264 @@
+/* 管理订单页面样式 */
+.manage-orders-container {
+    max-width: 1200px;
+    margin: 40px auto 80px auto;
+    padding: 32px 16px;
+    width: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* 状态筛选 */
+.manage-status-filter {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.manage-status-filter-btn {
+    padding: 8px 16px;
+    border: 2px solid #e8e8e8;
+    background: white;
+    color: #666;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.manage-status-filter-btn:hover {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+}
+
+.manage-status-filter-btn.active {
+    background: var(--primary-pink);
+    color: white;
+    border-color: var(--primary-pink);
+}
+
+/* 订单列表容器 */
+.manage-orders-container {
+    margin-bottom: 32px;
+}
+
+/* 订单网格 */
+.manage-orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+/* 订单卡片 */
+.manage-order-card {
+    background: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.manage-order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 订单头部 */
+.manage-order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.manage-order-id {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+}
+
+.manage-order-status {
+    font-weight: 600;
+    font-size: 14px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* 订单内容 */
+.manage-order-content {
+    display: flex;
+    gap: 16px;
+}
+
+/* 订单图片 */
+.manage-order-images {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.manage-series-image,
+.manage-style-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.manage-series-image img,
+.manage-style-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.manage-fallback-image {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 12px;
+}
+
+/* 订单信息 */
+.manage-order-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.manage-series-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+}
+
+.manage-style-name {
+    color: #666;
+    font-size: 14px;
+}
+
+.manage-hidden-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #ff69b4, #ff1493);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+}
+
+.manage-purchase-time {
+    color: #999;
+    font-size: 12px;
+}
+
+.manage-user-id {
+    color: #666;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* 分页 */
+.manage-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.manage-pagination-btn {
+    padding: 8px 16px;
+    border: 1px solid #d9d9d9;
+    background: white;
+    color: #666;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.manage-pagination-btn:hover:not(:disabled) {
+    border-color: var(--primary-pink);
+    color: var(--primary-pink);
+}
+
+.manage-pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.manage-pagination-info {
+    color: #666;
+    font-size: 14px;
+}
+
+/* 无订单状态 */
+.manage-no-orders {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.manage-no-orders-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.manage-no-orders-text {
+    font-size: 16px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .manage-orders-container {
+        margin: 20px auto 60px auto;
+        padding: 20px 12px;
+    }
+
+    .manage-orders-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .manage-order-card {
+        padding: 16px;
+    }
+
+    .manage-order-content {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .manage-order-images {
+        justify-content: center;
+    }
+
+    .manage-status-filter {
+        gap: 8px;
+    }
+
+    .manage-status-filter-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
