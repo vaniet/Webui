@@ -13,11 +13,25 @@
   --letter-color: #692748;
 }
 
+/* 全局页面样式 */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+body {
+  padding-bottom: 20px;
+  /* 为页面底部添加额外空间 */
+}
+
 /* 通用容器样式 */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  padding-bottom: 3rem;
 }
 
 /* 卡片样式 */
@@ -26,7 +40,7 @@
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -53,7 +67,7 @@
 .input-field {
   width: 100%;
   /* 撑满父容器宽度 */
-  padding: 12px; 
+  padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 5px;
   font-size: 16px;
@@ -187,6 +201,8 @@
   right: 0;
   background: var(--gradient-bg);
   /* 继承渐变背景 */
+  z-index: -1;
+  /* 确保背景在最底层 */
 }
 
 /* 表单容器样式 */
@@ -379,7 +395,7 @@
 }
 
 .app-content {
-  min-height: 100vh;
+  min-height: calc(100vh - 60px);
   width: 100vw;
   display: flex;
   justify-content: center;
@@ -388,6 +404,8 @@
   /* 从顶部开始对齐，避免与Header重叠 */
   position: relative;
   z-index: 1;
+  padding-bottom: 80px;
+  /* 为底部内容留出更多余量 */
 }
 
 .main-container {
@@ -403,14 +421,14 @@
 
 .main-page-container {
   max-width: 1200px;
-  margin: 80px auto 0 auto;
+  margin: 80px auto 80px auto;
   padding: 32px 16px;
   width: auto;
 }
 
 .series-detail-container {
   max-width: 700px;
-  margin: 40px auto 0 auto;
+  margin: 40px auto 80px auto;
   padding: 32px 16px;
   width: auto;
   background: white;
@@ -423,7 +441,7 @@
 
 .create-series-container {
   max-width: 800px;
-  margin: 40px auto 0 auto;
+  margin: 40px auto 80px auto;
   padding: 32px 16px;
   width: auto;
   background: white;
@@ -689,24 +707,24 @@
   .series-title {
     font-size: 28px;
   }
-  
+
   .series-subtitle {
     font-size: 16px;
   }
-  
+
   .series-cover-container {
     height: 200px;
   }
-  
+
   .series-styles-grid {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 16px;
   }
-  
+
   .style-image-container {
     height: 160px;
   }
-  
+
   .draw-button {
     padding: 14px 32px;
     font-size: 16px;

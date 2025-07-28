@@ -16,7 +16,7 @@ const App = () => {
     <UserProvider>
       <div className="fullscreen-gradient-bg"></div>
       <Header />
-      <div className="app-content" style={{ paddingTop: '60px' }}>
+      <div className="app-content" style={{ paddingTop: '60px', paddingBottom: '80px' }}>
         <Routes>
           <Route path="/" element={<LoginForm />} />
           <Route path="/login" element={<LoginForm />} />

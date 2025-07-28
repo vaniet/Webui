@@ -65,11 +65,11 @@ const RegisterForm = () => {
     if (Object.keys(newErrors).length > 0 && Object.values(newErrors).some(Boolean)) return;
     setLoading(true);
     try {
-      let avatarPath = '';
+      let avatarPath = 'null';
       if (avatarFile) {
         const formData = new FormData();
         formData.append('file', avatarFile);
-        formData.append('type', 'series/styles/avatar');
+        formData.append('type', 'avatar');
         formData.append('name', fields.username);
         const uploadRes = await fetch('http://localhost:7001/upload/', {
           method: 'POST',
@@ -87,7 +87,7 @@ const RegisterForm = () => {
           phone: fields.phone,
           password: fields.password,
           avatar: avatarPath,
-          role: 'user'
+          role: 'customer'
         })
       });
       const resJson = await registerRes.json();

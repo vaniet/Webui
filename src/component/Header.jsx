@@ -1,9 +1,15 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 
 const Header = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useUser();
+    
+    // 调试信息
+    console.log('Header - Current user:', user);
+    console.log('Header - User role:', user?.role);
 
     // 不需要显示Header的页面
     const hideHeaderPages = ['/', '/login', '/register'];
@@ -28,7 +34,8 @@ const Header = () => {
             alignItems: 'center',
             padding: '0 24px',
             zIndex: 1000,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            minWidth: '800px'
         }}>
             {/* 左侧 - 首页按钮 */}
             <div>
@@ -59,6 +66,64 @@ const Header = () => {
                     首页
                 </button>
             </div>
+
+            {/* 中间 - 管理员功能按钮 */}
+            {user && user.role === 'manager' && (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <button
+                        onClick={() => navigate('/createseries')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#722ed1',
+                            fontSize: '16px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(114, 46, 209, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = 'none';
+                        }}
+                    >
+                        <span style={{ fontSize: '18px' }}>➕</span>
+                        创建盲盒
+                    </button>
+                    <button
+                        onClick={() => navigate('/editseries')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#fa8c16',
+                            fontSize: '16px',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            padding: '8px 16px',
+                            borderRadius: '6px',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.target.style.background = 'rgba(250, 140, 22, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.background = 'none';
+                        }}
+                    >
+                        <span style={{ fontSize: '18px' }}>⚙️</span>
+                        管理盲盒
+                    </button>
+                </div>
+            )}
 
             {/* 右侧 - 个人信息按钮 */}
             <div>

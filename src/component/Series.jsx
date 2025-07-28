@@ -53,7 +53,7 @@ export default function Series() {
     return (
         <>
             <div className="fullscreen-gradient-bg" style={{ padding: '20px', paddingTop: '80px', height: 'auto', overflow: 'auto' }}>
-                <div style={{ maxWidth: '700px', margin: '0 auto', background: 'white', borderRadius: '12px', padding: '32px 16px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', marginBottom: '20px' }}>
+                <div style={{ maxWidth: '700px', margin: '0 auto 80px auto', background: 'white', borderRadius: '12px', padding: '32px 16px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
                     {/* 系列头部信息 */}
                     <div className="series-header">
                         <div className="series-title">{series.name}</div>

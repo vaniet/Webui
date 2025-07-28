@@ -70,7 +70,7 @@ const Dashboard = () => {
         <>
             <TopMessage message={msg} type={msgType} onClose={() => setMsg('')} />
             <div className="fullscreen-gradient-bg" style={{ padding: '20px', paddingTop: '80px', height: 'auto', overflow: 'auto' }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto', background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', marginBottom: '20px' }}>
+                <div style={{ maxWidth: '800px', margin: '0 auto 80px auto', background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
 
 
                     <h1 style={{ textAlign: 'center', marginBottom: '32px', color: '#692748' }}>个人信息</h1>
@@ -100,7 +100,7 @@ const Dashboard = () => {
                                 }}>
                                     {user.avatar ? (
                                         <img
-                                            src={user.avatar}
+                                            src={`http://localhost:7001/${user.avatar}`}
                                             alt="头像"
                                             style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
                                         />
