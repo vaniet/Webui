@@ -32,6 +32,16 @@ const OrderDetails = () => {
     const [confirmAction, setConfirmAction] = useState(null);
     const [confirmMessage, setConfirmMessage] = useState('');
 
+    // 批量操作相关状态
+    const [selectedOrders, setSelectedOrders] = useState(new Set());
+    const [showShippingModal, setShowShippingModal] = useState(false);
+    const [shippingForm, setShippingForm] = useState({
+        receiverName: '',
+        receiverPhone: '',
+        shippingAddress: ''
+    });
+    const [shippingLoading, setShippingLoading] = useState(false);
+
     // 显示确认弹窗
     const showConfirm = (action, message) => {
         setConfirmAction(() => action);
@@ -54,6 +64,130 @@ const OrderDetails = () => {
         setShowConfirmModal(false);
         setConfirmAction(null);
         setConfirmMessage('');
+    };
+
+    // 批量选择相关函数
+    const toggleOrderSelection = (orderId) => {
+        const newSelected = new Set(selectedOrders);
+        if (newSelected.has(orderId)) {
+            newSelected.delete(orderId);
+        } else {
+            newSelected.add(orderId);
+        }
+        setSelectedOrders(newSelected);
+    };
+
+    const selectAllOrders = () => {
+        // 只选择待发货状态的订单
+        const pendingOrderIds = filteredOrders
+            .filter(order => order.shippingStatus === 'pending')
+            .map(order => order.id);
+        setSelectedOrders(new Set(pendingOrderIds));
+    };
+
+    const clearSelection = () => {
+        setSelectedOrders(new Set());
+    };
+
+    const openShippingModal = () => {
+        setShowShippingModal(true);
+    };
+
+    const closeShippingModal = () => {
+        setShowShippingModal(false);
+        setShippingForm({
+            receiverName: '',
+            receiverPhone: '',
+            shippingAddress: ''
+        });
+    };
+
+    const handleShippingFormChange = (field, value) => {
+        setShippingForm(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    // 批量设置收货信息
+    const batchSetShippingInfo = async () => {
+        if (selectedOrders.size === 0) {
+            setMsgType('error');
+            setMsg('请先选择要设置的订单');
+            return;
+        }
+
+        // 验证选中的订单都是待发货状态
+        const selectedOrderDetails = orders.filter(order => selectedOrders.has(order.id));
+        const nonPendingOrders = selectedOrderDetails.filter(order => order.shippingStatus !== 'pending');
+
+        if (nonPendingOrders.length > 0) {
+            setMsgType('error');
+            setMsg('只能为待发货状态的订单设置收货信息');
+            return;
+        }
+
+        if (!shippingForm.receiverName || !shippingForm.receiverPhone || !shippingForm.shippingAddress) {
+            setMsgType('error');
+            setMsg('请填写完整的收货信息');
+            return;
+        }
+
+        setShippingLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setMsgType('error');
+                setMsg('请先登录');
+                return;
+            }
+
+            const promises = Array.from(selectedOrders).map(async (orderId) => {
+                try {
+                    const res = await fetch(`http://localhost:7001/purchase/shipping-info/${orderId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(shippingForm)
+                    });
+
+                    if (res.status === 401) {
+                        throw new Error('登录已过期');
+                    }
+
+                    const data = await res.json();
+                    if (data.code === 200) {
+                        return { orderId, success: true };
+                    } else {
+                        return { orderId, success: false, error: data.message };
+                    }
+                } catch (err) {
+                    return { orderId, success: false, error: err.message };
+                }
+            });
+
+            const results = await Promise.all(promises);
+            const successCount = results.filter(r => r.success).length;
+            const failCount = results.length - successCount;
+
+            if (successCount > 0) {
+                setMsgType('success');
+                setMsg(`成功设置 ${successCount} 个订单的收货信息${failCount > 0 ? `，${failCount} 个失败` : ''}`);
+                closeShippingModal();
+                clearSelection();
+                fetchOrders(); // 刷新订单列表
+            } else {
+                setMsgType('error');
+                setMsg('设置收货信息失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('网络错误，设置收货信息失败');
+        } finally {
+            setShippingLoading(false);
+        }
     };
 
     // 获取订单列表
@@ -233,7 +367,7 @@ const OrderDetails = () => {
                     return;
                 }
 
-                const res = await fetch(`http://localhost:7001/purchase/${orderId}/cancel`, {
+                const res = await fetch(`http://localhost:7001/purchase/cancel/${orderId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -305,6 +439,13 @@ const OrderDetails = () => {
         return order.shippingStatus === selectedStatus;
     });
 
+    // 当切换到非待发货状态时，清空选择
+    useEffect(() => {
+        if (selectedStatus !== 'pending') {
+            setSelectedOrders(new Set());
+        }
+    }, [selectedStatus]);
+
     // 计算各状态订单数量
     const statusCounts = {
         all: orders.length,
@@ -366,6 +507,40 @@ const OrderDetails = () => {
                         ))}
                     </div>
 
+                    {/* 批量操作区域 - 只在待发货状态显示 */}
+                    {filteredOrders.length > 0 && selectedStatus === 'pending' && (
+                        <div className="batch-actions">
+                            <div className="batch-selection">
+                                <button
+                                    className="batch-btn select-all-btn"
+                                    onClick={selectAllOrders}
+                                    disabled={selectedOrders.size === filteredOrders.length}
+                                >
+                                    全选
+                                </button>
+                                <button
+                                    className="batch-btn clear-btn"
+                                    onClick={clearSelection}
+                                    disabled={selectedOrders.size === 0}
+                                >
+                                    取消选择
+                                </button>
+                                <span className="selection-count">
+                                    已选择 {selectedOrders.size} 个订单
+                                </span>
+                            </div>
+                            <div className="batch-operations">
+                                <button
+                                    className="batch-btn shipping-btn"
+                                    onClick={openShippingModal}
+                                    disabled={selectedOrders.size === 0}
+                                >
+                                    批量设置收货信息
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* 订单列表 */}
                     <div className="orders-container">
                         {filteredOrders.length === 0 ? (
@@ -376,36 +551,52 @@ const OrderDetails = () => {
                         ) : (
                             <div className="orders-grid">
                                 {filteredOrders.map(order => (
-                                    <div key={order.id} className="order-card" onClick={() => openDetailModal(order)}>
-                                        <div className="order-header">
-                                            <div className="order-id">订单 #{order.id}</div>
-                                            <div
-                                                className="order-status"
-                                                style={{ color: getStatusColor(order.shippingStatus) }}
-                                            >
-                                                {getStatusDisplayName(order.shippingStatus)}
+                                    <div key={order.id} className={`order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
+                                        {/* 只在待发货状态显示选择框 */}
+                                        {selectedStatus === 'pending' && (
+                                            <div className="order-selection">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedOrders.has(order.id)}
+                                                    onChange={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleOrderSelection(order.id);
+                                                    }}
+                                                    className="order-checkbox"
+                                                />
                                             </div>
-                                        </div>
-                                        <div className="order-content">
-                                            <div className="order-images">
-                                                <div className="order-style-image">
-                                                    <img
-                                                        src={`http://localhost:7001/${order.styleCover}`}
-                                                        alt={order.styleName}
-                                                        onError={(e) => {
-                                                            e.target.style.display = 'none';
-                                                            e.target.nextSibling.style.display = 'flex';
-                                                        }}
-                                                    />
-                                                    <div className="fallback-image" style={{ display: 'none' }}>
-                                                        {order.styleName?.charAt(0)}
-                                                    </div>
+                                        )}
+                                        <div className="order-content-wrapper" onClick={() => openDetailModal(order)}>
+                                            <div className="order-header">
+                                                <div className="order-id">订单 #{order.id}</div>
+                                                <div
+                                                    className="order-status"
+                                                    style={{ color: getStatusColor(order.shippingStatus) }}
+                                                >
+                                                    {getStatusDisplayName(order.shippingStatus)}
                                                 </div>
                                             </div>
-                                            <div className="order-info">
-                                                <div className="style-name">{order.styleName}</div>
-                                                {order.isHidden && <div className="hidden-badge">隐藏款</div>}
-                                                <div className="purchase-time">购买时间: {formatDate(order.purchasedAt)}</div>
+                                            <div className="order-content">
+                                                <div className="order-images">
+                                                    <div className="order-style-image">
+                                                        <img
+                                                            src={`http://localhost:7001/${order.styleCover}`}
+                                                            alt={order.styleName}
+                                                            onError={(e) => {
+                                                                e.target.style.display = 'none';
+                                                                e.target.nextSibling.style.display = 'flex';
+                                                            }}
+                                                        />
+                                                        <div className="fallback-image" style={{ display: 'none' }}>
+                                                            {order.styleName?.charAt(0)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="order-info">
+                                                    <div className="style-name">{order.styleName}</div>
+                                                    {order.isHidden && <div className="hidden-badge">隐藏款</div>}
+                                                    <div className="purchase-time">购买时间: {formatDate(order.purchasedAt)}</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -554,6 +745,52 @@ const OrderDetails = () => {
                             ) : (
                                 <div className="detail-error">获取订单详情失败</div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 批量设置收货信息弹窗 */}
+            {showShippingModal && (
+                <div className="shipping-modal-overlay" onClick={closeShippingModal}>
+                    <div className="shipping-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="shipping-modal-title">批量设置收货信息</h3>
+                        <div className="shipping-form-group">
+                            <label htmlFor="receiverName">收货人:</label>
+                            <input
+                                type="text"
+                                id="receiverName"
+                                value={shippingForm.receiverName}
+                                onChange={(e) => handleShippingFormChange('receiverName', e.target.value)}
+                                placeholder="请输入收货人姓名"
+                            />
+                        </div>
+                        <div className="shipping-form-group">
+                            <label htmlFor="receiverPhone">联系电话:</label>
+                            <input
+                                type="text"
+                                id="receiverPhone"
+                                value={shippingForm.receiverPhone}
+                                onChange={(e) => handleShippingFormChange('receiverPhone', e.target.value)}
+                                placeholder="请输入联系电话"
+                            />
+                        </div>
+                        <div className="shipping-form-group">
+                            <label htmlFor="shippingAddress">收货地址:</label>
+                            <textarea
+                                id="shippingAddress"
+                                value={shippingForm.shippingAddress}
+                                onChange={(e) => handleShippingFormChange('shippingAddress', e.target.value)}
+                                placeholder="请输入收货地址"
+                            ></textarea>
+                        </div>
+                        <div className="shipping-modal-actions">
+                            <button className="shipping-modal-btn shipping-modal-yes" onClick={batchSetShippingInfo} disabled={shippingLoading}>
+                                {shippingLoading ? '设置中...' : '设置'}
+                            </button>
+                            <button className="shipping-modal-btn shipping-modal-no" onClick={closeShippingModal} disabled={shippingLoading}>
+                                取消
+                            </button>
                         </div>
                     </div>
                 </div>

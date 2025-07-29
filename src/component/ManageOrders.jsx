@@ -26,9 +26,11 @@ const ManageOrders = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalOrders, setTotalOrders] = useState(0);
-    const [showDetailModal, setShowDetailModal] = useState(false);
-    const [detailLoading, setDetailLoading] = useState(false);
-    const [orderDetail, setOrderDetail] = useState(null);
+    const [selectedOrders, setSelectedOrders] = useState(new Set());
+
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState(null);
+    const [confirmMessage, setConfirmMessage] = useState('');
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -114,56 +116,104 @@ const ManageOrders = () => {
         }
     };
 
-    // 获取订单详情
-    const fetchOrderDetail = async (orderId) => {
-        setDetailLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setMsgType('error');
-                setMsg('请先登录');
-                return;
-            }
+    // 显示确认弹窗
+    const showConfirm = (action, message) => {
+        setConfirmAction(() => action);
+        setConfirmMessage(message);
+        setShowConfirmModal(true);
+    };
 
-            const res = await fetch(`http://localhost:7001/purchase/${orderId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+    // 确认操作
+    const handleConfirm = async () => {
+        if (confirmAction && typeof confirmAction === 'function') {
+            await confirmAction();
+        }
+        setShowConfirmModal(false);
+        setConfirmAction(null);
+        setConfirmMessage('');
+    };
 
-            if (res.status === 401) {
-                setMsgType('error');
-                setMsg('登录已过期，请重新登录');
-                return;
-            }
+    // 取消确认
+    const handleCancelConfirm = () => {
+        setShowConfirmModal(false);
+        setConfirmAction(null);
+        setConfirmMessage('');
+    };
 
-            const data = await res.json();
-            if (data.code === 200) {
-                setOrderDetail(data.data);
-            } else {
-                setMsgType('error');
-                setMsg(data.message || '获取订单详情失败');
-            }
-        } catch (err) {
-            setMsgType('error');
-            setMsg('网络错误，获取订单详情失败');
-        } finally {
-            setDetailLoading(false);
+    // 选择/取消选择订单
+    const toggleOrderSelection = (orderId) => {
+        const newSelected = new Set(selectedOrders);
+        if (newSelected.has(orderId)) {
+            newSelected.delete(orderId);
+        } else {
+            newSelected.add(orderId);
+        }
+        setSelectedOrders(newSelected);
+    };
+
+    // 全选/取消全选
+    const toggleSelectAll = () => {
+        if (selectedOrders.size === orders.length) {
+            setSelectedOrders(new Set());
+        } else {
+            setSelectedOrders(new Set(orders.map(order => order.id)));
         }
     };
 
-    // 打开详情弹窗
-    const openDetailModal = async (order) => {
-        setShowDetailModal(true);
-        await fetchOrderDetail(order.id);
+    // 批量删除订单（仅限已取消的订单）
+    const batchDeleteOrders = async () => {
+        if (selectedOrders.size === 0) {
+            setMsgType('error');
+            setMsg('请先选择要删除的订单');
+            return;
+        }
+
+        showConfirm(async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setMsgType('error');
+                    setMsg('请先登录');
+                    return;
+                }
+
+                const res = await fetch('http://localhost:7001/purchase/batch', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ids: Array.from(selectedOrders)
+                    })
+                });
+
+                if (res.status === 401) {
+                    setMsgType('error');
+                    setMsg('登录已过期，请重新登录');
+                    return;
+                }
+
+                const data = await res.json();
+                if (data.code === 200) {
+                    setMsgType('success');
+                    setMsg(`成功删除 ${selectedOrders.size} 个订单`);
+                    setSelectedOrders(new Set());
+                    fetchOrders(); // 刷新订单列表
+                } else {
+                    setMsgType('error');
+                    setMsg(data.message || '批量删除失败');
+                }
+            } catch (err) {
+                setMsgType('error');
+                setMsg('网络错误，批量删除失败');
+            }
+        }, `确定要删除选中的 ${selectedOrders.size} 个已取消订单吗？删除后无法恢复。`);
     };
 
-    // 关闭详情弹窗
-    const closeDetailModal = () => {
-        setShowDetailModal(false);
-        setOrderDetail(null);
-    };
+
+
+
 
     // 获取状态显示名称
     const getStatusDisplayName = (status) => {
@@ -234,6 +284,10 @@ const ManageOrders = () => {
                             onClick={() => {
                                 setSelectedStatus(filter.key);
                                 setCurrentPage(1);
+                                // 切换到其他状态时清空选中的订单
+                                if (filter.key !== 'cancelled') {
+                                    setSelectedOrders(new Set());
+                                }
                             }}
                         >
                             {filter.label}
@@ -245,6 +299,28 @@ const ManageOrders = () => {
                 <div style={{ textAlign: 'center', marginBottom: '24px', color: '#666' }}>
                     共 {totalOrders} 个订单
                 </div>
+
+                {/* 批量操作 - 仅在已取消状态下显示 */}
+                {selectedStatus === 'cancelled' && orders.length > 0 && (
+                    <div className="manage-batch-actions">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div className="manage-select-all">
+                                <input
+                                    type="checkbox"
+                                    checked={selectedOrders.size === orders.length && orders.length > 0}
+                                    onChange={toggleSelectAll}
+                                    id="select-all"
+                                />
+                                <label htmlFor="select-all">全选</label>
+                            </div>
+                        </div>
+                        {selectedOrders.size > 0 && (
+                            <button className="manage-batch-delete-btn" onClick={batchDeleteOrders}>
+                                批量删除 ({selectedOrders.size})
+                            </button>
+                        )}
+                    </div>
+                )}
 
                 {/* 订单列表 */}
                 <div className="manage-orders-container">
@@ -266,8 +342,18 @@ const ManageOrders = () => {
                     ) : (
                         <div className="manage-orders-grid">
                             {orders.map(order => (
-                                <div key={order.id} className="manage-order-card" onClick={() => openDetailModal(order)}>
+                                <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
                                     <div className="manage-order-header">
+                                        {selectedStatus === 'cancelled' && (
+                                            <div className="manage-order-selection">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedOrders.has(order.id)}
+                                                    onChange={() => toggleOrderSelection(order.id)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                            </div>
+                                        )}
                                         <div className="manage-order-id">订单号: {order.id}</div>
                                         <div className="manage-order-status" style={{ color: getStatusColor(order.shippingStatus) }}>
                                             {getStatusDisplayName(order.shippingStatus)}
@@ -288,6 +374,100 @@ const ManageOrders = () => {
                                             {order.isHidden && <div className="manage-hidden-badge">隐藏款</div>}
                                             <div className="manage-purchase-time">购买时间: {formatDate(order.createdAt)}</div>
                                             <div className="manage-user-id">用户ID: {order.userId}</div>
+
+                                            {/* 已发货订单的额外信息 */}
+                                            {order.shippingStatus === 'shipped' && (
+                                                <div className="manage-shipping-info">
+                                                    {order.receiverName && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收件人:</span>
+                                                            <span className="manage-shipping-value">{order.receiverName}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.receiverPhone && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收货手机:</span>
+                                                            <span className="manage-shipping-value">{order.receiverPhone}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.shippingAddress && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收货地址:</span>
+                                                            <span className="manage-shipping-value">{order.shippingAddress}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.trackingNumber && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">运单号:</span>
+                                                            <span className="manage-shipping-value">{order.trackingNumber}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.shippedAt && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">发货时间:</span>
+                                                            <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
+                                                        </div>
+                                                    )}
+                                                    {/* 如果没有任何物流信息，显示提示 */}
+                                                    {!order.receiverName && !order.receiverPhone && !order.shippingAddress && !order.trackingNumber && !order.shippedAt && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
+                                                                暂无物流信息
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* 已收货订单的额外信息 */}
+                                            {order.shippingStatus === 'delivered' && (
+                                                <div className="manage-shipping-info" style={{ borderLeftColor: '#52c41a' }}>
+                                                    {order.receiverName && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收件人:</span>
+                                                            <span className="manage-shipping-value">{order.receiverName}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.receiverPhone && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收货手机:</span>
+                                                            <span className="manage-shipping-value">{order.receiverPhone}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.shippingAddress && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收货地址:</span>
+                                                            <span className="manage-shipping-value">{order.shippingAddress}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.trackingNumber && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">运单号:</span>
+                                                            <span className="manage-shipping-value">{order.trackingNumber}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.shippedAt && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">发货时间:</span>
+                                                            <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
+                                                        </div>
+                                                    )}
+                                                    {order.deliveredAt && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-label">收货时间:</span>
+                                                            <span className="manage-shipping-value">{formatDate(order.deliveredAt)}</span>
+                                                        </div>
+                                                    )}
+                                                    {/* 如果没有任何物流信息，显示提示 */}
+                                                    {!order.receiverName && !order.receiverPhone && !order.shippingAddress && !order.trackingNumber && !order.shippedAt && !order.deliveredAt && (
+                                                        <div className="manage-shipping-item">
+                                                            <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
+                                                                暂无物流信息
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -321,124 +501,17 @@ const ManageOrders = () => {
             </div>
 
             {/* 详情弹窗 */}
-            {showDetailModal && (
-                <div className="detail-modal-overlay" onClick={closeDetailModal}>
-                    <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="detail-modal-header">
-                            <h3 className="detail-modal-title">订单详情</h3>
-                            <button className="close-detail-btn" onClick={closeDetailModal}>×</button>
-                        </div>
-                        <div className="detail-modal-content">
-                            {detailLoading ? (
-                                <div className="detail-loading">
-                                    <div className="loading-spinner"></div>
-                                    <div className="loading-text">加载中...</div>
-                                </div>
-                            ) : orderDetail ? (
-                                <div className="order-detail-content">
-                                    {/* 订单基本信息 */}
-                                    <div className="detail-section">
-                                        <h4 className="detail-section-title">订单信息</h4>
-                                        <div className="detail-info-grid">
-                                            <div className="detail-info-item">
-                                                <span className="detail-label">订单号:</span>
-                                                <span className="detail-value">{orderDetail.id}</span>
-                                            </div>
-                                            <div className="detail-info-item">
-                                                <span className="detail-label">用户ID:</span>
-                                                <span className="detail-value">{orderDetail.userId}</span>
-                                            </div>
-                                            <div className="detail-info-item">
-                                                <span className="detail-label">购买时间:</span>
-                                                <span className="detail-value">{formatDate(orderDetail.createdAt)}</span>
-                                            </div>
-                                            <div className="detail-info-item">
-                                                <span className="detail-label">订单状态:</span>
-                                                <span className="status-badge" style={{ color: getStatusColor(orderDetail.shippingStatus) }}>
-                                                    {getStatusDisplayName(orderDetail.shippingStatus)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
+            {/* This section is removed as the detail modal is removed. */}
 
-                                    {/* 商品信息 */}
-                                    <div className="detail-section">
-                                        <h4 className="detail-section-title">商品信息</h4>
-                                        <div className="product-detail">
-                                            <div className="product-images">
-                                                <div className="product-series-image">
-                                                    <img src={`http://localhost:7001/${orderDetail.seriesCover}`} alt={orderDetail.seriesName} />
-                                                </div>
-                                                <div className="product-style-image">
-                                                    <img src={`http://localhost:7001/${orderDetail.styleCover}`} alt={orderDetail.styleName} />
-                                                </div>
-                                            </div>
-                                            <div className="product-info">
-                                                <div className="product-series-name">{orderDetail.seriesName}</div>
-                                                <div className="product-style-name">{orderDetail.styleName}</div>
-                                                <div className="product-description">{orderDetail.styleDescription}</div>
-                                                {orderDetail.isHidden && <div className="detail-hidden-badge">隐藏款</div>}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* 收货信息 */}
-                                    {(orderDetail.shippingAddress || orderDetail.receiverName || orderDetail.receiverPhone) && (
-                                        <div className="detail-section">
-                                            <h4 className="detail-section-title">收货信息</h4>
-                                            <div className="detail-info-grid">
-                                                {orderDetail.receiverName && (
-                                                    <div className="detail-info-item">
-                                                        <span className="detail-label">收货人:</span>
-                                                        <span className="detail-value">{orderDetail.receiverName}</span>
-                                                    </div>
-                                                )}
-                                                {orderDetail.receiverPhone && (
-                                                    <div className="detail-info-item">
-                                                        <span className="detail-label">联系电话:</span>
-                                                        <span className="detail-value">{orderDetail.receiverPhone}</span>
-                                                    </div>
-                                                )}
-                                                {orderDetail.shippingAddress && (
-                                                    <div className="detail-info-item full-width">
-                                                        <span className="detail-label">收货地址:</span>
-                                                        <span className="detail-value">{orderDetail.shippingAddress}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* 物流信息 */}
-                                    {orderDetail.shippingStatus !== 'pending' && orderDetail.shippingStatus !== 'cancelled' && (
-                                        <div className="detail-section">
-                                            <h4 className="detail-section-title">物流信息</h4>
-                                            <div className="detail-info-grid">
-                                                {orderDetail.shippedAt && (
-                                                    <div className="detail-info-item">
-                                                        <span className="detail-label">发货时间:</span>
-                                                        <span className="detail-value">{formatDate(orderDetail.shippedAt)}</span>
-                                                    </div>
-                                                )}
-                                                {orderDetail.deliveredAt && (
-                                                    <div className="detail-info-item">
-                                                        <span className="detail-label">收货时间:</span>
-                                                        <span className="detail-value">{formatDate(orderDetail.deliveredAt)}</span>
-                                                    </div>
-                                                )}
-                                                {orderDetail.trackingNumber && (
-                                                    <div className="detail-info-item">
-                                                        <span className="detail-label">快递单号:</span>
-                                                        <span className="detail-value">{orderDetail.trackingNumber}</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="detail-error">获取订单详情失败</div>
-                            )}
+            {/* 确认弹窗 */}
+            {showConfirmModal && (
+                <div className="confirm-modal-overlay" onClick={handleCancelConfirm}>
+                    <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="confirm-modal-title">确认操作</h3>
+                        <p className="confirm-modal-message">{confirmMessage}</p>
+                        <div className="confirm-modal-actions">
+                            <button className="confirm-modal-btn confirm-modal-yes" onClick={handleConfirm}>是</button>
+                            <button className="confirm-modal-btn confirm-modal-no" onClick={handleCancelConfirm}>否</button>
                         </div>
                     </div>
                 </div>
