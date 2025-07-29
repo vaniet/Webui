@@ -475,115 +475,114 @@ const ManageOrders = () => {
                                         </div>
                                     </div>
                                     <div className="manage-order-content">
-                                        <div className="manage-order-images">
-                                            <div className="manage-series-image">
-                                                <img src={`http://localhost:7001/${order.seriesCover}`} alt={order.seriesName} />
+                                        <div className="manage-order-left">
+                                            <div className="manage-order-images">
+                                                <div className="manage-style-image">
+                                                    <img src={`http://localhost:7001/${order.styleCover}`} alt={order.styleName} />
+                                                </div>
                                             </div>
-                                            <div className="manage-style-image">
-                                                <img src={`http://localhost:7001/${order.styleCover}`} alt={order.styleName} />
+                                            <div className="manage-order-info">
+                                                <div className="manage-series-name">{order.seriesName}</div>
+                                                <div className="manage-style-name">{order.styleName}</div>
+                                                {order.isHidden && <div className="manage-hidden-badge">隐藏款</div>}
+                                                <div className="manage-purchase-time">购买时间: {formatDate(order.createdAt)}</div>
+                                                <div className="manage-user-id">用户ID: {order.userId}</div>
                                             </div>
                                         </div>
-                                        <div className="manage-order-info">
-                                            <div className="manage-series-name">{order.seriesName}</div>
-                                            <div className="manage-style-name">{order.styleName}</div>
-                                            {order.isHidden && <div className="manage-hidden-badge">隐藏款</div>}
-                                            <div className="manage-purchase-time">购买时间: {formatDate(order.createdAt)}</div>
-                                            <div className="manage-user-id">用户ID: {order.userId}</div>
 
-                                            {/* 已发货订单的额外信息 */}
-                                            {order.shippingStatus === 'shipped' && (
-                                                <div className="manage-shipping-info">
-                                                    {order.receiverName && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收件人:</span>
-                                                            <span className="manage-shipping-value">{order.receiverName}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.receiverPhone && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货手机:</span>
-                                                            <span className="manage-shipping-value">{order.receiverPhone}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.shippingAddress && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货地址:</span>
-                                                            <span className="manage-shipping-value">{order.shippingAddress}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.trackingNumber && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">运单号:</span>
-                                                            <span className="manage-shipping-value">{order.trackingNumber}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.shippedAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">发货时间:</span>
-                                                            <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
-                                                        </div>
-                                                    )}
-                                                    {/* 如果没有任何物流信息，显示提示 */}
-                                                    {!order.receiverName && !order.receiverPhone && !order.shippingAddress && !order.trackingNumber && !order.shippedAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
-                                                                暂无物流信息
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
+                                        {/* 已发货订单的额外信息 - 右侧显示 */}
+                                        {order.shippingStatus === 'shipped' && (
+                                            <div className="manage-shipping-info-right">
+                                                {order.receiverName && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收件人:</span>
+                                                        <span className="manage-shipping-value">{order.receiverName}</span>
+                                                    </div>
+                                                )}
+                                                {order.receiverPhone && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收货手机:</span>
+                                                        <span className="manage-shipping-value">{order.receiverPhone}</span>
+                                                    </div>
+                                                )}
+                                                {order.shippingAddress && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收货地址:</span>
+                                                        <span className="manage-shipping-value">{order.shippingAddress}</span>
+                                                    </div>
+                                                )}
+                                                {order.trackingNumber && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">运单号:</span>
+                                                        <span className="manage-shipping-value">{order.trackingNumber}</span>
+                                                    </div>
+                                                )}
+                                                {order.shippedAt && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">发货时间:</span>
+                                                        <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
+                                                    </div>
+                                                )}
+                                                {/* 如果没有任何物流信息，显示提示 */}
+                                                {!order.receiverName && !order.receiverPhone && !order.shippingAddress && !order.trackingNumber && !order.shippedAt && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
+                                                            暂无物流信息
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
 
-                                            {/* 已收货订单的额外信息 */}
-                                            {order.shippingStatus === 'delivered' && (
-                                                <div className="manage-shipping-info" style={{ borderLeftColor: '#52c41a' }}>
-                                                    {order.receiverName && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收件人:</span>
-                                                            <span className="manage-shipping-value">{order.receiverName}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.receiverPhone && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货手机:</span>
-                                                            <span className="manage-shipping-value">{order.receiverPhone}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.shippingAddress && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货地址:</span>
-                                                            <span className="manage-shipping-value">{order.shippingAddress}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.trackingNumber && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">运单号:</span>
-                                                            <span className="manage-shipping-value">{order.trackingNumber}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.shippedAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">发货时间:</span>
-                                                            <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
-                                                        </div>
-                                                    )}
-                                                    {order.deliveredAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-label">收货时间:</span>
-                                                            <span className="manage-shipping-value">{formatDate(order.deliveredAt)}</span>
-                                                        </div>
-                                                    )}
-                                                    {/* 如果没有任何物流信息，显示提示 */}
-                                                    {!order.receiverName && !order.receiverPhone && !order.shippingAddress && !order.trackingNumber && !order.shippedAt && !order.deliveredAt && (
-                                                        <div className="manage-shipping-item">
-                                                            <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
-                                                                暂无物流信息
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
+                                        {/* 已收货订单的额外信息 - 右侧显示 */}
+                                        {order.shippingStatus === 'delivered' && (
+                                            <div className="manage-shipping-info-right" style={{ borderLeftColor: '#52c41a' }}>
+                                                {order.receiverName && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收件人:</span>
+                                                        <span className="manage-shipping-value">{order.receiverName}</span>
+                                                    </div>
+                                                )}
+                                                {order.receiverPhone && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收货手机:</span>
+                                                        <span className="manage-shipping-value">{order.receiverPhone}</span>
+                                                    </div>
+                                                )}
+                                                {order.shippingAddress && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收货地址:</span>
+                                                        <span className="manage-shipping-value">{order.shippingAddress}</span>
+                                                    </div>
+                                                )}
+                                                {order.trackingNumber && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">运单号:</span>
+                                                        <span className="manage-shipping-value">{order.trackingNumber}</span>
+                                                    </div>
+                                                )}
+                                                {order.shippedAt && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">发货时间:</span>
+                                                        <span className="manage-shipping-value">{formatDate(order.shippedAt)}</span>
+                                                    </div>
+                                                )}
+                                                {order.deliveredAt && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-label">收货时间:</span>
+                                                        <span className="manage-shipping-value">{formatDate(order.deliveredAt)}</span>
+                                                    </div>
+                                                )}
+                                                {/* 如果没有任何物流信息，显示提示 */}
+                                                {!order.receiverName && !order.receiverPhone && !order.shippingAddress && !order.trackingNumber && !order.shippedAt && !order.deliveredAt && (
+                                                    <div className="manage-shipping-item">
+                                                        <span className="manage-shipping-value" style={{ color: '#999', fontStyle: 'italic' }}>
+                                                            暂无物流信息
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
