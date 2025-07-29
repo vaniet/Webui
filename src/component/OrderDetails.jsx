@@ -363,96 +363,6 @@ const OrderDetails = () => {
         setOrderDetail(null);
     };
 
-    // 删除购买记录
-    const deletePurchase = (orderId) => {
-        console.log('删除按钮被点击，显示确认弹窗');
-        showConfirm(async () => {
-            console.log('用户确认删除，开始执行删除操作');
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setMsgType('error');
-                    setMsg('请先登录');
-                    return;
-                }
-
-                const res = await fetch(`http://localhost:7001/purchase/${orderId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (res.status === 401) {
-                    setMsgType('error');
-                    setMsg('登录已过期，请重新登录');
-                    return;
-                }
-
-                const data = await res.json();
-                if (data.code === 200) {
-                    setMsgType('success');
-                    setMsg('购买记录删除成功');
-                    // 关闭弹窗并刷新订单列表
-                    closeDetailModal();
-                    fetchOrders();
-                } else {
-                    setMsgType('error');
-                    setMsg(data.message || '删除失败');
-                }
-            } catch (err) {
-                setMsgType('error');
-                setMsg('网络错误，删除失败');
-            }
-        }, '确定要删除这条购买记录吗？删除后无法恢复。');
-    };
-
-    // 取消订单
-    const cancelOrder = (orderId) => {
-        console.log('取消按钮被点击，显示确认弹窗');
-        showConfirm(async () => {
-            console.log('用户确认取消，开始执行取消操作');
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setMsgType('error');
-                    setMsg('请先登录');
-                    return;
-                }
-
-                const res = await fetch(`http://localhost:7001/purchase/cancel/${orderId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                if (res.status === 401) {
-                    setMsgType('error');
-                    setMsg('登录已过期，请重新登录');
-                    return;
-                }
-
-                const data = await res.json();
-                if (data.code === 200) {
-                    setMsgType('success');
-                    setMsg('订单取消成功');
-                    // 关闭弹窗并刷新订单列表
-                    closeDetailModal();
-                    fetchOrders();
-                } else {
-                    setMsgType('error');
-                    setMsg(data.message || '取消订单失败');
-                }
-            } catch (err) {
-                setMsgType('error');
-                setMsg('网络错误，取消订单失败');
-            }
-        }, '确定要取消这个订单吗？取消后无法恢复。');
-    };
-
     // 格式化日期
     const formatDate = (dateString) => {
         if (!dateString) return '未知';
@@ -794,20 +704,7 @@ const OrderDetails = () => {
                                             </div>
                                         </div>
                                     )}
-                                    {orderDetail.shippingStatus === 'cancelled' && (
-                                        <div className="detail-section">
-                                            <button className="delete-purchase-btn" onClick={() => deletePurchase(orderDetail.id)}>
-                                                删除购买记录
-                                            </button>
-                                        </div>
-                                    )}
-                                    {orderDetail.shippingStatus === 'pending' && (
-                                        <div className="detail-section">
-                                            <button className="cancel-order-btn" onClick={() => cancelOrder(orderDetail.id)}>
-                                                取消订单
-                                            </button>
-                                        </div>
-                                    )}
+
                                 </div>
                             ) : (
                                 <div className="detail-error">获取订单详情失败</div>

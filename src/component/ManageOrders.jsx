@@ -263,56 +263,7 @@ const ManageOrders = () => {
         }
     };
 
-    // 批量删除订单（仅限已取消的订单）
-    const batchDeleteOrders = async () => {
-        if (selectedOrders.size === 0) {
-            setMsgType('error');
-            setMsg('请先选择要删除的订单');
-            return;
-        }
 
-        showConfirm(async () => {
-            try {
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    setMsgType('error');
-                    setMsg('请先登录');
-                    return;
-                }
-
-                const res = await fetch('http://localhost:7001/purchase/batch', {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        ids: Array.from(selectedOrders)
-                    })
-                });
-
-                if (res.status === 401) {
-                    setMsgType('error');
-                    setMsg('登录已过期，请重新登录');
-                    return;
-                }
-
-                const data = await res.json();
-                if (data.code === 200) {
-                    setMsgType('success');
-                    setMsg(`成功删除 ${selectedOrders.size} 个订单`);
-                    setSelectedOrders(new Set());
-                    fetchOrders(); // 刷新订单列表
-                } else {
-                    setMsgType('error');
-                    setMsg(data.message || '批量删除失败');
-                }
-            } catch (err) {
-                setMsgType('error');
-                setMsg('网络错误，批量删除失败');
-            }
-        }, `确定要删除选中的 ${selectedOrders.size} 个已取消订单吗？删除后无法恢复。`);
-    };
 
 
 
@@ -388,7 +339,7 @@ const ManageOrders = () => {
                                 setSelectedStatus(filter.key);
                                 setCurrentPage(1);
                                 // 切换到其他状态时清空选中的订单
-                                if (filter.key !== 'cancelled' && filter.key !== 'pending') {
+                                if (filter.key !== 'pending') {
                                     setSelectedOrders(new Set());
                                 }
                             }}
@@ -403,8 +354,8 @@ const ManageOrders = () => {
                     共 {totalOrders} 个订单
                 </div>
 
-                {/* 批量操作 - 在待发货和已取消状态下显示 */}
-                {((selectedStatus === 'pending' || selectedStatus === 'cancelled') && orders.length > 0) && (
+                {/* 批量操作 - 仅在待发货状态下显示 */}
+                {selectedStatus === 'pending' && orders.length > 0 && (
                     <div className="manage-batch-actions">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="manage-select-all">
@@ -422,16 +373,9 @@ const ManageOrders = () => {
                         </div>
                         {selectedOrders.size > 0 && (
                             <div className="manage-batch-buttons">
-                                {selectedStatus === 'pending' && (
-                                    <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
-                                        批量发货 ({selectedOrders.size})
-                                    </button>
-                                )}
-                                {selectedStatus === 'cancelled' && (
-                                    <button className="manage-batch-delete-btn" onClick={batchDeleteOrders}>
-                                        批量删除 ({selectedOrders.size})
-                                    </button>
-                                )}
+                                <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
+                                    批量发货 ({selectedOrders.size})
+                                </button>
                             </div>
                         )}
                     </div>
@@ -459,7 +403,7 @@ const ManageOrders = () => {
                             {orders.map(order => (
                                 <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
                                     <div className="manage-order-header">
-                                        {(selectedStatus === 'cancelled' || selectedStatus === 'pending') && (
+                                        {selectedStatus === 'pending' && (
                                             <div className="manage-order-selection">
                                                 <input
                                                     type="checkbox"
