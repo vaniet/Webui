@@ -27,6 +27,12 @@ const ManageOrders = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalOrders, setTotalOrders] = useState(0);
     const [selectedOrders, setSelectedOrders] = useState(new Set());
+    const [showShippingModal, setShowShippingModal] = useState(false);
+    const [shippingForm, setShippingForm] = useState({
+        trackingNumber: '',
+        shippedAt: new Date().toISOString().slice(0, 16) // 当前时间，格式为 YYYY-MM-DDTHH:mm
+    });
+    const [shippingLoading, setShippingLoading] = useState(false);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
@@ -160,6 +166,103 @@ const ManageOrders = () => {
         }
     };
 
+    // 打开发货弹窗
+    const openShippingModal = () => {
+        setShowShippingModal(true);
+    };
+
+    // 关闭发货弹窗
+    const closeShippingModal = () => {
+        setShowShippingModal(false);
+        setShippingForm({
+            trackingNumber: '',
+            shippedAt: new Date().toISOString().slice(0, 16)
+        });
+    };
+
+    // 处理发货表单变化
+    const handleShippingFormChange = (field, value) => {
+        setShippingForm(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    // 批量发货
+    const batchShipping = async () => {
+        if (selectedOrders.size === 0) {
+            setMsgType('error');
+            setMsg('请先选择要发货的订单');
+            return;
+        }
+
+        setShippingLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setMsgType('error');
+                setMsg('请先登录');
+                return;
+            }
+
+            const requestBody = {
+                ids: Array.from(selectedOrders)
+            };
+
+            // 只有当用户填写了运单号时才添加到请求体
+            if (shippingForm.trackingNumber.trim()) {
+                requestBody.trackingNumber = shippingForm.trackingNumber.trim();
+            }
+
+            // 只有当用户修改了发货时间时才添加到请求体
+            if (shippingForm.shippedAt) {
+                requestBody.shippedAt = new Date(shippingForm.shippedAt).toISOString();
+            }
+
+            const res = await fetch('http://localhost:7001/purchase/batch-shipping', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (res.status === 401) {
+                setMsgType('error');
+                setMsg('登录已过期，请重新登录');
+                return;
+            }
+
+            const data = await res.json();
+            if (data.code === 200) {
+                const { success, failed, errors } = data.data;
+                let message = `批量发货完成：成功${success}个，失败${failed}个`;
+
+                if (failed > 0 && errors && errors.length > 0) {
+                    message += `\n失败原因：${errors.join('; ')}`;
+                }
+
+                setMsgType(success > 0 ? 'success' : 'error');
+                setMsg(message);
+
+                if (success > 0) {
+                    closeShippingModal();
+                    setSelectedOrders(new Set());
+                    fetchOrders(); // 刷新订单列表
+                }
+            } else {
+                setMsgType('error');
+                setMsg(data.message || '批量发货失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('网络错误，批量发货失败');
+        } finally {
+            setShippingLoading(false);
+        }
+    };
+
     // 批量删除订单（仅限已取消的订单）
     const batchDeleteOrders = async () => {
         if (selectedOrders.size === 0) {
@@ -285,7 +388,7 @@ const ManageOrders = () => {
                                 setSelectedStatus(filter.key);
                                 setCurrentPage(1);
                                 // 切换到其他状态时清空选中的订单
-                                if (filter.key !== 'cancelled') {
+                                if (filter.key !== 'cancelled' && filter.key !== 'pending') {
                                     setSelectedOrders(new Set());
                                 }
                             }}
@@ -300,8 +403,8 @@ const ManageOrders = () => {
                     共 {totalOrders} 个订单
                 </div>
 
-                {/* 批量操作 - 仅在已取消状态下显示 */}
-                {selectedStatus === 'cancelled' && orders.length > 0 && (
+                {/* 批量操作 - 在待发货和已取消状态下显示 */}
+                {((selectedStatus === 'pending' || selectedStatus === 'cancelled') && orders.length > 0) && (
                     <div className="manage-batch-actions">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="manage-select-all">
@@ -313,11 +416,23 @@ const ManageOrders = () => {
                                 />
                                 <label htmlFor="select-all">全选</label>
                             </div>
+                            <span className="manage-selection-count">
+                                已选择 {selectedOrders.size} 个订单
+                            </span>
                         </div>
                         {selectedOrders.size > 0 && (
-                            <button className="manage-batch-delete-btn" onClick={batchDeleteOrders}>
-                                批量删除 ({selectedOrders.size})
-                            </button>
+                            <div className="manage-batch-buttons">
+                                {selectedStatus === 'pending' && (
+                                    <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
+                                        批量发货 ({selectedOrders.size})
+                                    </button>
+                                )}
+                                {selectedStatus === 'cancelled' && (
+                                    <button className="manage-batch-delete-btn" onClick={batchDeleteOrders}>
+                                        批量删除 ({selectedOrders.size})
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
                 )}
@@ -344,7 +459,7 @@ const ManageOrders = () => {
                             {orders.map(order => (
                                 <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
                                     <div className="manage-order-header">
-                                        {selectedStatus === 'cancelled' && (
+                                        {(selectedStatus === 'cancelled' || selectedStatus === 'pending') && (
                                             <div className="manage-order-selection">
                                                 <input
                                                     type="checkbox"
@@ -500,8 +615,49 @@ const ManageOrders = () => {
                 )}
             </div>
 
-            {/* 详情弹窗 */}
-            {/* This section is removed as the detail modal is removed. */}
+            {/* 批量发货弹窗 */}
+            {showShippingModal && (
+                <div className="manage-shipping-modal-overlay" onClick={closeShippingModal}>
+                    <div className="manage-shipping-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="manage-shipping-modal-title">批量发货</h3>
+                        <div className="manage-shipping-form-group">
+                            <label htmlFor="trackingNumber">运单号 (可选):</label>
+                            <input
+                                type="text"
+                                id="trackingNumber"
+                                value={shippingForm.trackingNumber}
+                                onChange={(e) => handleShippingFormChange('trackingNumber', e.target.value)}
+                                placeholder="请输入运单号"
+                            />
+                        </div>
+                        <div className="manage-shipping-form-group">
+                            <label htmlFor="shippedAt">发货时间:</label>
+                            <input
+                                type="datetime-local"
+                                id="shippedAt"
+                                value={shippingForm.shippedAt}
+                                onChange={(e) => handleShippingFormChange('shippedAt', e.target.value)}
+                            />
+                        </div>
+                        <div className="manage-shipping-modal-actions">
+                            <button
+                                className="manage-shipping-modal-btn manage-shipping-modal-yes"
+                                onClick={batchShipping}
+                                disabled={shippingLoading}
+                            >
+                                {shippingLoading ? '发货中...' : '确认发货'}
+                            </button>
+                            <button
+                                className="manage-shipping-modal-btn manage-shipping-modal-no"
+                                onClick={closeShippingModal}
+                                disabled={shippingLoading}
+                            >
+                                取消
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* 确认弹窗 */}
             {showConfirmModal && (

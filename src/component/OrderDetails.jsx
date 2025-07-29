@@ -41,6 +41,7 @@ const OrderDetails = () => {
         shippingAddress: ''
     });
     const [shippingLoading, setShippingLoading] = useState(false);
+    const [shippingInfoStatus, setShippingInfoStatus] = useState({}); // 存储每个订单的收货信息状态
 
     // 显示确认弹窗
     const showConfirm = (action, message) => {
@@ -177,7 +178,15 @@ const OrderDetails = () => {
                 setMsg(`成功设置 ${successCount} 个订单的收货信息${failCount > 0 ? `，${failCount} 个失败` : ''}`);
                 closeShippingModal();
                 clearSelection();
-                fetchOrders(); // 刷新订单列表
+
+                // 更新收货信息状态
+                const updatedStatus = { ...shippingInfoStatus };
+                Array.from(selectedOrders).forEach(orderId => {
+                    updatedStatus[orderId] = true;
+                });
+                setShippingInfoStatus(updatedStatus);
+
+                // 不需要重新fetchOrders，直接更新状态即可
             } else {
                 setMsgType('error');
                 setMsg('设置收货信息失败');
@@ -188,6 +197,45 @@ const OrderDetails = () => {
         } finally {
             setShippingLoading(false);
         }
+    };
+
+    // 检查收货信息完整性
+    const checkShippingInfo = async (orderId) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return false;
+
+            const res = await fetch(`http://localhost:7001/purchase/shipping-info/check/${orderId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                return data.code === 200 && data.data && data.data.isComplete === true;
+            }
+            return false;
+        } catch (err) {
+            console.error(`检查订单 ${orderId} 收货信息失败:`, err);
+            return false;
+        }
+    };
+
+    // 批量检查收货信息状态
+    const checkAllShippingInfo = async (orderIds) => {
+        const statusPromises = orderIds.map(async (orderId) => {
+            const isComplete = await checkShippingInfo(orderId);
+            return { orderId, isComplete };
+        });
+
+        const results = await Promise.all(statusPromises);
+        const statusMap = {};
+        results.forEach(({ orderId, isComplete }) => {
+            statusMap[orderId] = isComplete;
+        });
+        setShippingInfoStatus(statusMap);
     };
 
     // 获取订单列表
@@ -246,6 +294,12 @@ const OrderDetails = () => {
                 const orderDetails = await Promise.all(orderPromises);
                 const validOrders = orderDetails.filter(order => order !== null);
                 setOrders(validOrders);
+
+                // 检查所有订单的收货信息状态
+                if (validOrders.length > 0) {
+                    const orderIds = validOrders.map(order => order.id);
+                    await checkAllShippingInfo(orderIds);
+                }
             } else {
                 setError(data.message || '获取订单信息失败');
             }
@@ -596,6 +650,12 @@ const OrderDetails = () => {
                                                     <div className="style-name">{order.styleName}</div>
                                                     {order.isHidden && <div className="hidden-badge">隐藏款</div>}
                                                     <div className="purchase-time">购买时间: {formatDate(order.purchasedAt)}</div>
+                                                    {/* 收货信息状态标识 */}
+                                                    {order.shippingStatus === 'pending' && (
+                                                        <div className={`shipping-info-status ${shippingInfoStatus[order.id] ? 'complete' : 'incomplete'}`}>
+                                                            {shippingInfoStatus[order.id] ? '✅ 收货信息已填写' : '⚠️ 收货信息未填写'}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -704,7 +764,14 @@ const OrderDetails = () => {
                                     {/* 收货信息 */}
                                     {(orderDetail.shippingAddress || orderDetail.receiverName || orderDetail.receiverPhone) && (
                                         <div className="detail-section">
-                                            <h4 className="detail-section-title">收货信息</h4>
+                                            <h4 className="detail-section-title">
+                                                收货信息
+                                                {orderDetail.shippingStatus === 'pending' && (
+                                                    <span className={`detail-status-badge ${shippingInfoStatus[orderDetail.id] ? 'complete' : 'incomplete'}`}>
+                                                        {shippingInfoStatus[orderDetail.id] ? '✅ 已填写' : '⚠️ 未填写'}
+                                                    </span>
+                                                )}
+                                            </h4>
                                             <div className="detail-info-grid">
                                                 {orderDetail.receiverName && (
                                                     <div className="detail-info-item">

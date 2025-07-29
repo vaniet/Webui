@@ -888,3 +888,67 @@
         width: 100%;
     }
 }
+
+/* 收货信息状态标识样式 */
+.shipping-info-status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-top: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.shipping-info-status.complete {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.shipping-info-status.incomplete {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.shipping-info-status:hover {
+    transform: scale(1.05);
+}
+
+/* 详情弹窗中的状态标识 */
+.detail-status-badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 8px;
+    margin-left: 12px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.detail-status-badge.complete {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.detail-status-badge.incomplete {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+/* 响应式设计 - 收货信息状态 */
+@media (max-width: 768px) {
+    .shipping-info-status {
+        font-size: 11px;
+        padding: 3px 6px;
+    }
+
+    .detail-status-badge {
+        font-size: 11px;
+        padding: 3px 6px;
+        margin-left: 8px;
+    }
+}
