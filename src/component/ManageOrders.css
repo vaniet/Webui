@@ -398,6 +398,29 @@
     transform: translateY(-1px);
 }
 
+.manage-batch-delivery-btn {
+    background: #52c41a;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.manage-batch-delivery-btn:hover {
+    background: #73d13d;
+    transform: translateY(-1px);
+}
+
+.manage-batch-delivery-btn:disabled {
+    background: #d9d9d9;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* 批量发货弹窗样式 */
 .manage-shipping-modal-overlay {
     position: fixed;

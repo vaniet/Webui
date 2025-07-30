@@ -33,6 +33,7 @@ const ManageOrders = () => {
         shippedAt: new Date().toISOString().slice(0, 16) // 当前时间，格式为 YYYY-MM-DDTHH:mm
     });
     const [shippingLoading, setShippingLoading] = useState(false);
+    const [deliveryLoading, setDeliveryLoading] = useState(false);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [confirmAction, setConfirmAction] = useState(null);
@@ -263,6 +264,69 @@ const ManageOrders = () => {
         }
     };
 
+    // 批量收货
+    const batchConfirmDelivery = async () => {
+        if (selectedOrders.size === 0) {
+            setMsgType('error');
+            setMsg('请先选择要确认收货的订单');
+            return;
+        }
+
+        setDeliveryLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setMsgType('error');
+                setMsg('请先登录');
+                return;
+            }
+
+            const promises = Array.from(selectedOrders).map(async (orderId) => {
+                try {
+                    const res = await fetch(`http://localhost:7001/purchase/confirm-delivery/${orderId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (res.status === 401) {
+                        throw new Error('登录已过期');
+                    }
+
+                    const data = await res.json();
+                    if (data.code === 200) {
+                        return { orderId, success: true };
+                    } else {
+                        return { orderId, success: false, error: data.message };
+                    }
+                } catch (err) {
+                    return { orderId, success: false, error: err.message };
+                }
+            });
+
+            const results = await Promise.all(promises);
+            const successCount = results.filter(r => r.success).length;
+            const failCount = results.length - successCount;
+
+            if (successCount > 0) {
+                setMsgType('success');
+                setMsg(`成功确认收货 ${successCount} 个订单${failCount > 0 ? `，${failCount} 个失败` : ''}`);
+                setSelectedOrders(new Set());
+                fetchOrders(); // 刷新订单列表
+            } else {
+                setMsgType('error');
+                setMsg('确认收货失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('网络错误，确认收货失败');
+        } finally {
+            setDeliveryLoading(false);
+        }
+    };
+
 
 
 
@@ -339,7 +403,7 @@ const ManageOrders = () => {
                                 setSelectedStatus(filter.key);
                                 setCurrentPage(1);
                                 // 切换到其他状态时清空选中的订单
-                                if (filter.key !== 'pending') {
+                                if (filter.key !== 'pending' && filter.key !== 'shipped') {
                                     setSelectedOrders(new Set());
                                 }
                             }}
@@ -354,8 +418,8 @@ const ManageOrders = () => {
                     共 {totalOrders} 个订单
                 </div>
 
-                {/* 批量操作 - 仅在待发货状态下显示 */}
-                {selectedStatus === 'pending' && orders.length > 0 && (
+                {/* 批量操作 - 在待发货和已发货状态下显示 */}
+                {((selectedStatus === 'pending' || selectedStatus === 'shipped') && orders.length > 0) && (
                     <div className="manage-batch-actions">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <div className="manage-select-all">
@@ -373,9 +437,20 @@ const ManageOrders = () => {
                         </div>
                         {selectedOrders.size > 0 && (
                             <div className="manage-batch-buttons">
-                                <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
-                                    批量发货 ({selectedOrders.size})
-                                </button>
+                                {selectedStatus === 'pending' && (
+                                    <button className="manage-batch-shipping-btn" onClick={openShippingModal}>
+                                        批量发货 ({selectedOrders.size})
+                                    </button>
+                                )}
+                                {selectedStatus === 'shipped' && (
+                                    <button
+                                        className="manage-batch-delivery-btn"
+                                        onClick={batchConfirmDelivery}
+                                        disabled={deliveryLoading}
+                                    >
+                                        {deliveryLoading ? '确认中...' : `批量收货 (${selectedOrders.size})`}
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -403,7 +478,7 @@ const ManageOrders = () => {
                             {orders.map(order => (
                                 <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
                                     <div className="manage-order-header">
-                                        {selectedStatus === 'pending' && (
+                                        {(selectedStatus === 'pending' || selectedStatus === 'shipped') && (
                                             <div className="manage-order-selection">
                                                 <input
                                                     type="checkbox"

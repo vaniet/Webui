@@ -692,6 +692,22 @@
     transform: translateY(-1px);
 }
 
+.delivery-btn {
+    background: #52c41a;
+    color: white;
+}
+
+.delivery-btn:hover:not(:disabled) {
+    background: #73d13d;
+    transform: translateY(-1px);
+}
+
+.delivery-btn:disabled {
+    background: #d9d9d9;
+    cursor: not-allowed;
+    transform: none;
+}
+
 .selection-count {
     font-size: 14px;
     color: #666;
