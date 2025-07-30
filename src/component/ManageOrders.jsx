@@ -338,8 +338,7 @@ const ManageOrders = () => {
         const statusMap = {
             'pending': '待发货',
             'shipped': '已发货',
-            'delivered': '已收货',
-            'cancelled': '已取消'
+            'delivered': '已收货'
         };
         return statusMap[status] || status;
     };
@@ -349,8 +348,7 @@ const ManageOrders = () => {
         const colorMap = {
             'pending': '#faad14',
             'shipped': '#1890ff',
-            'delivered': '#52c41a',
-            'cancelled': '#ff4d4f'
+            'delivered': '#52c41a'
         };
         return colorMap[status] || '#666';
     };
@@ -372,8 +370,7 @@ const ManageOrders = () => {
         { key: 'all', label: '全部' },
         { key: 'pending', label: '待发货' },
         { key: 'shipped', label: '已发货' },
-        { key: 'delivered', label: '已收货' },
-        { key: 'cancelled', label: '已取消' }
+        { key: 'delivered', label: '已收货' }
     ];
 
     if (!user || user.role !== 'manager') {
