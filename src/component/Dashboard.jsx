@@ -240,6 +240,20 @@ const Dashboard = () => {
                                 borderTop: '1px solid #e8e8e8'
                             }}>
                                 <button
+                                    onClick={() => navigate('/showcase')}
+                                    style={{
+                                        padding: '10px 20px',
+                                        border: '1px solid #692748',
+                                        borderRadius: '6px',
+                                        background: 'white',
+                                        color: '#692748',
+                                        cursor: 'pointer',
+                                        fontSize: '14px'
+                                    }}
+                                >
+                                    🎁 我的展示柜
+                                </button>
+                                <button
                                     onClick={() => {
                                         setMsgType('info');
                                         setMsg('功能开发中...');

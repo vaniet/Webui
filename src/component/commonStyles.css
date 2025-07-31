@@ -400,10 +400,11 @@ body {
   display: flex;
   justify-content: center;
   /* 水平居中 */
-  align-items: center;
-  /* 垂直居中 */
+  align-items: flex-start;
+  /* 改为顶部对齐，允许滚动 */
   position: relative;
   z-index: 1;
+  overflow-y: auto;
 }
 
 .main-container {

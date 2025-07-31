@@ -11,6 +11,7 @@ import Dashboard from "./component/Dashboard.jsx";
 import OrderDetails from "./component/OrderDetails.jsx";
 import ManageOrders from "./component/ManageOrders.jsx";
 import PlayerShow from "./component/PlayerShow.jsx";
+import BlindBoxShowcase from "./component/BlindBoxShowcase.jsx";
 import Header from "./component/Header.jsx";
 import { UserProvider } from './contexts/UserContext';
 
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/orders" element={<OrderDetails />} />
           <Route path="/manageorders" element={<ManageOrders />} />
           <Route path="/playershow" element={<PlayerShow />} />
+          <Route path="/showcase" element={<BlindBoxShowcase />} />
         </Routes>
       </div>
     </UserProvider>

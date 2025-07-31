@@ -38,7 +38,7 @@ const Header = () => {
             minWidth: '800px'
         }}>
             {/* 左侧 - 首页按钮 */}
-            <div>
+            <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                     onClick={() => navigate('/mainpage')}
                     style={{
@@ -64,6 +64,32 @@ const Header = () => {
                 >
                     <span style={{ fontSize: '18px' }}>🏠</span>
                     首页
+                </button>
+                <button
+                    onClick={() => navigate('/showcase')}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#692748',
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.background = 'rgba(105, 39, 72, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.background = 'none';
+                    }}
+                >
+                    <span style={{ fontSize: '18px' }}>🎁</span>
+                    我的展示柜
                 </button>
             </div>
 
