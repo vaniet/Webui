@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CreatePlayerShow from './CreatePlayerShow';
+import PlayerShowDetail from './PlayerShowDetail';
 import './PlayerShow.css';
 
 export default function PlayerShow() {
@@ -10,6 +11,8 @@ export default function PlayerShow() {
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [selectedShowcaseId, setSelectedShowcaseId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -58,8 +61,8 @@ export default function PlayerShow() {
     };
 
     const handleCardClick = (showcaseId) => {
-        // 这里可以跳转到玩家秀详情页面
-        console.log('查看玩家秀详情:', showcaseId);
+        setSelectedShowcaseId(showcaseId);
+        setIsDetailModalOpen(true);
     };
 
     const handleCreateSuccess = () => {
@@ -220,6 +223,13 @@ export default function PlayerShow() {
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={handleCreateSuccess}
+            />
+
+            {/* 玩家秀详情弹窗 */}
+            <PlayerShowDetail
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                showcaseId={selectedShowcaseId}
             />
         </div>
     );
