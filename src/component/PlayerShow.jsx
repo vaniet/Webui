@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CreatePlayerShow from './CreatePlayerShow';
 import './PlayerShow.css';
 
 export default function PlayerShow() {
@@ -8,11 +9,31 @@ export default function PlayerShow() {
     const [error, setError] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchShowcases();
     }, [currentPage]);
+
+    const formatTime = (timeString) => {
+        const date = new Date(timeString);
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 60) {
+            return `${minutes}分钟前`;
+        } else if (hours < 24) {
+            return `${hours}小时前`;
+        } else if (days < 7) {
+            return `${days}天前`;
+        } else {
+            return date.toLocaleDateString();
+        }
+    };
 
     const fetchShowcases = async () => {
         setLoading(true);
@@ -36,14 +57,14 @@ export default function PlayerShow() {
         }
     };
 
-    const handleShareClick = () => {
-        // 这里可以跳转到分享页面或打开分享弹窗
-        console.log('分享我的收获');
-    };
-
     const handleCardClick = (showcaseId) => {
         // 这里可以跳转到玩家秀详情页面
         console.log('查看玩家秀详情:', showcaseId);
+    };
+
+    const handleCreateSuccess = () => {
+        // 刷新玩家秀列表
+        fetchShowcases();
     };
 
     return (
@@ -120,19 +141,18 @@ export default function PlayerShow() {
                                     </div>
                                 </div>
 
-                                {/* 操作按钮 */}
-                                <div className="player-show-actions">
-                                    <button
-                                        className="player-show-share-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleShareClick();
-                                        }}
-                                    >
-                                        <span>🎁</span>
-                                        分享我的收获
-                                    </button>
+                                {/* 创建日期 */}
+                                <div style={{
+                                    marginTop: '12px',
+                                    paddingTop: '12px',
+                                    borderTop: '1px solid #f0f0f0',
+                                    fontSize: '12px',
+                                    color: '#999',
+                                    textAlign: 'right'
+                                }}>
+                                    {formatTime(showcase.createdAt)}
                                 </div>
+
                             </div>
                         ))}
                     </div>
@@ -160,6 +180,47 @@ export default function PlayerShow() {
                     </div>
                 )}
             </div>
+
+            {/* 悬浮发布按钮 */}
+            <div
+                className="floating-create-btn"
+                onClick={() => setIsCreateModalOpen(true)}
+                style={{
+                    position: 'fixed',
+                    right: '30px',
+                    bottom: '30px',
+                    width: '60px',
+                    height: '60px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #692748, #5a1f3d)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(105, 39, 72, 0.3)',
+                    transition: 'all 0.3s ease',
+                    zIndex: 999
+                }}
+                onMouseEnter={(e) => {
+                    e.target.style.transform = 'scale(1.1)';
+                    e.target.style.boxShadow = '0 6px 16px rgba(105, 39, 72, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(105, 39, 72, 0.3)';
+                }}
+            >
+                ✏️
+            </div>
+
+            {/* 创建玩家秀弹窗 */}
+            <CreatePlayerShow
+                isOpen={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={handleCreateSuccess}
+            />
         </div>
     );
 }
