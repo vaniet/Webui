@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useUser } from '../contexts/UserContext';
 import { userApi } from '../services/userApi';
 
@@ -16,7 +16,7 @@ function TopMessage({ message, type, onClose }) {
     );
 }
 
-const DrawBox = ({ seriesId, onDrawComplete }) => {
+const DrawBox = forwardRef(({ seriesId, onDrawComplete, onCancel, onPaymentConfirm }, ref) => {
     const { user, refreshUser } = useUser();
     const [isDrawing, setIsDrawing] = useState(false);
     const [drawResult, setDrawResult] = useState(null);
@@ -30,6 +30,11 @@ const DrawBox = ({ seriesId, onDrawComplete }) => {
     const [currentStockIndex, setCurrentStockIndex] = useState(0);
     const [selectedBoxIndex, setSelectedBoxIndex] = useState(null);
     const [seriesInfo, setSeriesInfo] = useState(null);
+
+    // 暴露方法给父组件
+    useImperativeHandle(ref, () => ({
+        executeDraw
+    }));
 
     // 计算剩余数量
     const calculateRemainingCount = (stock) => {
@@ -208,6 +213,18 @@ const DrawBox = ({ seriesId, onDrawComplete }) => {
             return;
         }
 
+        // 如果有确认支付回调，先调用它
+        if (onPaymentConfirm) {
+            onPaymentConfirm();
+            return;
+        }
+
+        // 如果没有确认支付回调，直接执行抽卡
+        await executeDraw();
+    };
+
+    // 执行实际的抽卡逻辑
+    const executeDraw = async () => {
         setIsDrawing(true);
         setShowResult(false);
         setDrawResult(null);
@@ -387,22 +404,56 @@ const DrawBox = ({ seriesId, onDrawComplete }) => {
                 {/* 抽取按钮 */}
                 {!loadingStock && stockInfo && stockInfo.length > 0 && (
                     <div className="draw-action-section">
-                        <button
-                            className={`draw-button ${isDrawing ? 'drawing' : ''}`}
-                            onClick={performDraw}
-                            disabled={isDrawing || !selectedStockId || selectedBoxIndex === null}
-                        >
-                            {isDrawing ? (
-                                <>
-                                    <div className="draw-spinner"></div>
-                                    <span>抽卡中...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <span className="draw-text">抽取</span>
-                                </>
+                        <div style={{
+                            display: 'flex',
+                            gap: '12px',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}>
+                            <button
+                                className={`draw-button ${isDrawing ? 'drawing' : ''}`}
+                                onClick={performDraw}
+                                disabled={isDrawing || !selectedStockId || selectedBoxIndex === null}
+                            >
+                                {isDrawing ? (
+                                    <>
+                                        <div className="draw-spinner"></div>
+                                        <span>抽卡中...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="draw-text">抽取</span>
+                                    </>
+                                )}
+                            </button>
+                            {onCancel && (
+                                <button
+                                    onClick={onCancel}
+                                    disabled={isDrawing}
+                                    style={{
+                                        padding: '12px 24px',
+                                        background: 'white',
+                                        color: '#666',
+                                        border: '1px solid #d9d9d9',
+                                        borderRadius: '8px',
+                                        fontSize: '16px',
+                                        fontWeight: '500',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = '#f5f5f5';
+                                        e.target.style.borderColor = '#ccc';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = 'white';
+                                        e.target.style.borderColor = '#d9d9d9';
+                                    }}
+                                >
+                                    取消
+                                </button>
                             )}
-                        </button>
+                        </div>
                     </div>
                 )}
 
@@ -450,6 +501,6 @@ const DrawBox = ({ seriesId, onDrawComplete }) => {
             </div>
         </>
     );
-};
+});
 
 export default DrawBox; 

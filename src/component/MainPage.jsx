@@ -7,6 +7,7 @@ export default function MainPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [priceData, setPriceData] = useState({});
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -20,6 +21,8 @@ export default function MainPage() {
                     const series = data.data || [];
                     setSeriesList(series);
                     setFilteredSeriesList(series);
+                    // 获取所有系列的价格信息
+                    await fetchAllPrices(series);
                 } else {
                     setError(data.message || '获取系列失败');
                 }
@@ -31,6 +34,108 @@ export default function MainPage() {
         }
         fetchSeries();
     }, []);
+
+    // 获取所有系列的价格信息
+    const fetchAllPrices = async (seriesList) => {
+        const pricePromises = seriesList.map(async (series) => {
+            try {
+                const res = await fetch(`http://localhost:7001/price/${series.id}`);
+                const data = await res.json();
+                if (data.code === 200) {
+                    return { seriesId: series.id, priceInfo: data.data };
+                }
+                return { seriesId: series.id, priceInfo: null };
+            } catch (err) {
+                return { seriesId: series.id, priceInfo: null };
+            }
+        });
+
+        const priceResults = await Promise.all(pricePromises);
+        const priceMap = {};
+        priceResults.forEach(result => {
+            if (result.priceInfo) {
+                priceMap[result.seriesId] = result.priceInfo;
+            }
+        });
+        setPriceData(priceMap);
+    };
+
+        // 价格显示组件
+    const PriceDisplay = ({ seriesId }) => {
+        const priceInfo = priceData[seriesId];
+        
+        if (!priceInfo) {
+            return <div style={{ 
+                color: '#999', 
+                fontSize: '14px', 
+                textAlign: 'center',
+                marginTop: '8px' 
+            }}>暂无价格</div>;
+        }
+
+        const hasDiscount = priceInfo.discountRate < 1;
+
+        return (
+            <div style={{ 
+                marginTop: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '4px'
+            }}>
+                {hasDiscount ? (
+                    <>
+                        <div style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            gap: '8px',
+                            flexWrap: 'wrap'
+                        }}>
+                            <span style={{ 
+                                textDecoration: 'line-through', 
+                                color: '#999', 
+                                fontSize: '14px',
+                                lineHeight: '1'
+                            }}>
+                                ¥{priceInfo.price}
+                            </span>
+                            <span style={{ 
+                                color: 'rgb(195, 40, 42)', 
+                                fontSize: '18px', 
+                                fontWeight: 'bold',
+                                lineHeight: '1'
+                            }}>
+                                ¥{priceInfo.actualPrice}
+                            </span>
+                            <span style={{
+                                background: 'linear-gradient(135deg,rgb(235, 72, 75), #ff7875)',
+                                color: 'white',
+                                padding: '2px 6px',
+                                borderRadius: '8px',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                boxShadow: '0 2px 4px rgba(190, 47, 52, 0.3)',
+                                lineHeight: '1'
+                            }}>
+                                {(priceInfo.discountRate * 10).toFixed(1)}折
+                            </span>
+                        </div>
+                    </>
+                ) : (
+                    <div style={{ 
+                        color: '#1890ff', 
+                        fontSize: '18px', 
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        lineHeight: '1'
+                    }}>
+                        ¥{priceInfo.price}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     // 本地搜索过滤功能
     const handleSearch = (value) => {
@@ -176,6 +281,7 @@ export default function MainPage() {
                                 <div className="series-card-content">
                                     <div className="series-card-title">{series.name}</div>
                                     <div className="series-card-description">{series.description}</div>
+                                    <PriceDisplay seriesId={series.id} />
                                 </div>
                             </div>
                         );
