@@ -29,6 +29,13 @@ const EditSeries = () => {
     const [stockLoading, setStockLoading] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [deleteTargetId, setDeleteTargetId] = useState(null);
+
+    // 新增价格管理相关状态
+    const [showPriceModal, setShowPriceModal] = useState(false);
+    const [priceData, setPriceData] = useState({});
+    const [priceLoading, setPriceLoading] = useState(false);
+    const [priceForm, setPriceForm] = useState({ price: '', discountRate: '' });
+
     const navigate = useNavigate();
 
     // 获取所有系列详情
@@ -183,6 +190,113 @@ const EditSeries = () => {
         fetchStockInfo(series.id);
     };
 
+    // 获取价格信息
+    const fetchPriceInfo = async (seriesId) => {
+        try {
+            const res = await fetch(`http://localhost:7001/price/${seriesId}`);
+            const data = await res.json();
+            if (data.code === 200) {
+                setPriceData(prev => ({
+                    ...prev,
+                    [seriesId]: data.data
+                }));
+                // 设置表单初始值
+                setPriceForm({
+                    price: data.data.price || '',
+                    discountRate: data.data.discountRate || ''
+                });
+            } else {
+                throw new Error(data.message || '获取价格信息失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('获取价格信息失败');
+        }
+    };
+
+    // 设置价格
+    const setPrice = async () => {
+        if (!selectedSeries || !priceForm.price || parseFloat(priceForm.price) <= 0) {
+            setMsgType('error');
+            setMsg('请输入有效的价格');
+            return;
+        }
+
+        setPriceLoading(true);
+        try {
+            const res = await fetch('http://localhost:7001/price/set-price', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    seriesId: selectedSeries.id,
+                    price: parseFloat(priceForm.price)
+                })
+            });
+            const data = await res.json();
+
+            if (data.code === 200) {
+                setMsgType('success');
+                setMsg('价格设置成功');
+                // 刷新价格信息
+                await fetchPriceInfo(selectedSeries.id);
+            } else {
+                throw new Error(data.message || '设置价格失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('设置价格失败');
+        } finally {
+            setPriceLoading(false);
+        }
+    };
+
+    // 设置折扣
+    const setDiscount = async () => {
+        if (!selectedSeries || !priceForm.discountRate || parseFloat(priceForm.discountRate) <= 0 || parseFloat(priceForm.discountRate) > 1) {
+            setMsgType('error');
+            setMsg('请输入有效的折扣率（0-1之间）');
+            return;
+        }
+
+        setPriceLoading(true);
+        try {
+            const res = await fetch('http://localhost:7001/price/set-discount', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    seriesId: selectedSeries.id,
+                    discountRate: parseFloat(priceForm.discountRate)
+                })
+            });
+            const data = await res.json();
+
+            if (data.code === 200) {
+                setMsgType('success');
+                setMsg('折扣设置成功');
+                // 刷新价格信息
+                await fetchPriceInfo(selectedSeries.id);
+            } else {
+                throw new Error(data.message || '设置折扣失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('设置折扣失败');
+        } finally {
+            setPriceLoading(false);
+        }
+    };
+
+    // 打开价格管理模态框
+    const openPriceModal = (series) => {
+        setSelectedSeries(series);
+        setShowPriceModal(true);
+        fetchPriceInfo(series.id);
+    };
+
     // 将款式ID数组转换为款式名称
     const getStyleNamesFromIds = (idsString, styles) => {
         try {
@@ -250,7 +364,6 @@ const EditSeries = () => {
             <div className="fullscreen-gradient-bg" style={{ padding: '20px', paddingTop: '80px', height: 'auto', overflow: 'auto' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto 80px auto', background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' }}>
 
-
                     <h1 style={{ textAlign: 'center', marginBottom: '32px', color: '#692748' }}>系列管理</h1>
 
                     {seriesList.length === 0 ? (
@@ -279,6 +392,22 @@ const EditSeries = () => {
                                                 onClick={() => toggleSeriesExpansion(series.id)}
                                             >
                                                 {expandedSeries.has(series.id) ? '收起' : '展开'}
+                                            </button>
+                                            <button
+                                                className="price-button"
+                                                onClick={() => openPriceModal(series)}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    border: '1px solid #1890ff',
+                                                    borderRadius: '5px',
+                                                    background: 'white',
+                                                    color: '#1890ff',
+                                                    cursor: 'pointer',
+                                                    fontSize: '14px',
+                                                    marginRight: '8px'
+                                                }}
+                                            >
+                                                价格管理
                                             </button>
                                             <button
                                                 className="stock-button"
@@ -325,7 +454,23 @@ const EditSeries = () => {
                                                             <div key={style.id} className="style-management-card">
                                                                 <div className="style-image-container">
                                                                     <img src={`http://localhost:7001/${style.cover}`} alt={style.name} />
-                                                                    {style.isHidden && <div className="hidden-badge">隐藏款</div>}
+                                                                    {style.isHidden && (
+                                                                        <div style={{
+                                                                            position: 'absolute',
+                                                                            top: '8px',
+                                                                            right: '8px',
+                                                                            background: 'linear-gradient(135deg, #ff3860, #ff6b9d)',
+                                                                            color: 'white',
+                                                                            padding: '4px 8px',
+                                                                            borderRadius: '12px',
+                                                                            fontSize: '11px',
+                                                                            fontWeight: '600',
+                                                                            boxShadow: '0 2px 4px rgba(255, 56, 96, 0.3)',
+                                                                            zIndex: 1
+                                                                        }}>
+                                                                            隐藏款
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                                 <div className="style-info">
                                                                     <div className="style-name">{style.name}</div>
@@ -472,6 +617,159 @@ const EditSeries = () => {
                                 >
                                     {stockLoading ? '创建中...' : '创建库存'}
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 价格管理模态框 */}
+            {showPriceModal && selectedSeries && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0,0,0,0.5)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '12px',
+                        padding: '32px',
+                        maxWidth: '500px',
+                        width: '90%',
+                        maxHeight: '80vh',
+                        overflow: 'auto'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ margin: 0, color: '#692748' }}>价格管理 - {selectedSeries.name}</h2>
+                            <button
+                                onClick={() => setShowPriceModal(false)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    fontSize: '24px',
+                                    cursor: 'pointer',
+                                    color: '#999'
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* 当前价格信息 */}
+                        <div style={{ marginBottom: '24px' }}>
+                            <h3 style={{ marginBottom: '16px', color: '#333' }}>当前价格信息</h3>
+                            {priceData[selectedSeries.id] ? (
+                                <div style={{
+                                    border: '1px solid #e8e8e8',
+                                    borderRadius: '8px',
+                                    padding: '16px',
+                                    background: '#f6ffed'
+                                }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                        <span style={{ fontWeight: 'bold', color: '#52c41a' }}>价格信息</span>
+                                        <span style={{ fontSize: '12px', color: '#999' }}>
+                                            {new Date(priceData[selectedSeries.id].updatedAt).toLocaleString()}
+                                        </span>
+                                    </div>
+                                    <div style={{ fontSize: '14px', color: '#666', lineHeight: '1.6' }}>
+                                        <div>原价: ¥{priceData[selectedSeries.id].price}</div>
+                                        <div>折扣率: {(priceData[selectedSeries.id].discountRate * 100).toFixed(0)}%</div>
+                                        <div style={{ fontWeight: 'bold', color: '#1890ff', fontSize: '16px' }}>
+                                            实际价格: ¥{priceData[selectedSeries.id].actualPrice}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+                                    暂无价格信息
+                                </div>
+                            )}
+                        </div>
+
+                        {/* 设置价格 */}
+                        <div style={{ borderTop: '1px solid #e8e8e8', paddingTop: '24px', marginBottom: '24px' }}>
+                            <h3 style={{ marginBottom: '16px', color: '#333' }}>设置价格</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                                <label style={{ fontSize: '14px', color: '#333', minWidth: '60px' }}>原价:</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={priceForm.price}
+                                    onChange={(e) => setPriceForm(prev => ({ ...prev, price: e.target.value }))}
+                                    placeholder="请输入价格"
+                                    style={{
+                                        padding: '8px 12px',
+                                        border: '1px solid #d9d9d9',
+                                        borderRadius: '4px',
+                                        flex: 1
+                                    }}
+                                />
+                                <button
+                                    onClick={setPrice}
+                                    disabled={priceLoading}
+                                    style={{
+                                        padding: '8px 16px',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        background: priceLoading ? '#ccc' : '#1890ff',
+                                        color: 'white',
+                                        cursor: priceLoading ? 'not-allowed' : 'pointer',
+                                        fontSize: '14px',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    {priceLoading ? '设置中...' : '设置价格'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* 设置折扣 */}
+                        <div style={{ borderTop: '1px solid #e8e8e8', paddingTop: '24px' }}>
+                            <h3 style={{ marginBottom: '16px', color: '#333' }}>设置折扣</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <label style={{ fontSize: '14px', color: '#333', minWidth: '60px' }}>折扣率:</label>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="1"
+                                    step="0.01"
+                                    value={priceForm.discountRate}
+                                    onChange={(e) => setPriceForm(prev => ({ ...prev, discountRate: e.target.value }))}
+                                    placeholder="0.0-1.0"
+                                    style={{
+                                        padding: '8px 12px',
+                                        border: '1px solid #d9d9d9',
+                                        borderRadius: '4px',
+                                        flex: 1
+                                    }}
+                                />
+                                <button
+                                    onClick={setDiscount}
+                                    disabled={priceLoading}
+                                    style={{
+                                        padding: '8px 16px',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        background: priceLoading ? '#ccc' : '#52c41a',
+                                        color: 'white',
+                                        cursor: priceLoading ? 'not-allowed' : 'pointer',
+                                        fontSize: '14px',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    {priceLoading ? '设置中...' : '设置折扣'}
+                                </button>
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#999', marginTop: '8px' }}>
+                                折扣率范围: 0.0-1.0 (0.8 表示 8 折)
                             </div>
                         </div>
                     </div>

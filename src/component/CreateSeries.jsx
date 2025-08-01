@@ -31,6 +31,11 @@ const CreateSeries = () => {
     // 系列封面文件
     const [seriesCoverFile, setSeriesCoverFile] = useState(null);
 
+    // 价格信息
+    const [priceInfo, setPriceInfo] = useState({
+        price: ''
+    });
+
     // 样式列表
     const [styles, setStyles] = useState([
         {
@@ -50,6 +55,11 @@ const CreateSeries = () => {
     const handleSeriesChange = (e) => {
         const { name, value } = e.target;
         setSeriesInfo(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePriceChange = (e) => {
+        const { name, value } = e.target;
+        setPriceInfo(prev => ({ ...prev, [name]: value }));
     };
 
     const handleStyleChange = (index, field, value) => {
@@ -131,6 +141,11 @@ const CreateSeries = () => {
                 throw new Error('至少需要添加一个样式');
             }
 
+            // 验证价格
+            if (!priceInfo.price || parseFloat(priceInfo.price) <= 0) {
+                throw new Error('请输入有效的价格');
+            }
+
             // 1. 上传系列封面
             let seriesCoverPath = '';
             if (seriesCoverFile) {
@@ -204,8 +219,30 @@ const CreateSeries = () => {
 
             // 检查是否有id字段来判断创建成功
             if (data.id) {
+                // 4. 设置价格
+                const priceData = {
+                    seriesId: data.id,
+                    price: parseFloat(priceInfo.price)
+                };
+
+                const priceRes = await fetch('http://localhost:7001/price/set-price', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(priceData)
+                });
+
+                if (!priceRes.ok) {
+                    throw new Error('价格设置失败');
+                }
+
+                const priceResult = await priceRes.json();
+                console.log('价格设置结果:', priceResult);
+
                 setMsgType('success');
-                setMsg('系列创建成功！');
+                setMsg('系列创建成功！价格设置成功！');
 
                 // 清空所有字段内容
                 setSeriesInfo({
@@ -215,6 +252,9 @@ const CreateSeries = () => {
                     detail: ''
                 });
                 setSeriesCoverFile(null);
+                setPriceInfo({
+                    price: ''
+                });
                 setStyles([{
                     name: '',
                     isHidden: false,
@@ -322,6 +362,26 @@ const CreateSeries = () => {
                                     onChange={handleSeriesChange}
                                     rows="2"
                                     style={{ resize: 'vertical' }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* 价格设置 */}
+                        <div style={{ marginBottom: '32px' }}>
+                            <h2 style={{ marginBottom: '16px', color: '#692748' }}>价格设置</h2>
+
+                            <div className="form-group">
+                                <label>价格 (元) *</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    className="input-field"
+                                    placeholder="请输入价格"
+                                    value={priceInfo.price}
+                                    onChange={handlePriceChange}
+                                    min="0"
+                                    step="0.01"
+                                    required
                                 />
                             </div>
                         </div>

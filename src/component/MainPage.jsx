@@ -75,7 +75,7 @@ export default function MainPage() {
                 }}>
                     <input
                         type="text"
-                        placeholder="搜索系列名称、描述..."
+                        placeholder="搜索系列名称..."
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
                         style={{
