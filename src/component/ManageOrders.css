@@ -1,3 +1,42 @@
+/* 顶部消息提示样式 */
+.top-message {
+    position: fixed !important;
+    top: 80px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    z-index: 9999 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    animation: slideDown 0.3s ease !important;
+}
+
+.top-message-success {
+    background: #f6ffed;
+    color: #52c41a;
+    border: 1px solid #b7eb8f;
+}
+
+.top-message-error {
+    background: #fff2f0;
+    color: #ff4d4f;
+    border: 1px solid #ffccc7;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
 /* 管理订单页面样式 */
 .manage-orders-container {
     max-width: 1200px;
@@ -237,11 +276,42 @@
     font-weight: 500;
 }
 
-/* 已发货订单的物流信息 - 右侧显示 */
+/* 收货信息状态标识 */
+.manage-shipping-info-status {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display: inline-block;
+    width: fit-content;
+    margin-top: 4px;
+}
+
+.manage-shipping-info-status.complete {
+    background: rgba(82, 196, 26, 0.1);
+    color: #52c41a;
+    border: 1px solid rgba(82, 196, 26, 0.3);
+}
+
+.manage-shipping-info-status.incomplete {
+    background: rgba(250, 173, 20, 0.1);
+    color: #faad14;
+    border: 1px solid rgba(250, 173, 20, 0.3);
+}
+
+/* 统一的信息显示区域 - 右侧显示 */
 .manage-shipping-info-right {
     padding: 16px;
     min-width: 280px;
     flex-shrink: 0;
+    border-left: 3px solid #1890ff;
+    background: rgba(24, 144, 255, 0.02);
+}
+
+/* 已收货订单的特殊样式 */
+.manage-shipping-info-right.delivered {
+    border-left-color: #52c41a;
+    background: rgba(82, 196, 26, 0.02);
 }
 
 /* 已发货订单的物流信息 - 下方显示（保留原有样式用于兼容） */
@@ -398,42 +468,21 @@
     transform: translateY(-1px);
 }
 
-.manage-batch-delivery-btn {
-    background: #52c41a;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
 
-.manage-batch-delivery-btn:hover {
-    background: #73d13d;
-    transform: translateY(-1px);
-}
-
-.manage-batch-delivery-btn:disabled {
-    background: #d9d9d9;
-    cursor: not-allowed;
-    transform: none;
-}
 
 /* 批量发货弹窗样式 */
 .manage-shipping-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    animation: fadeIn 0.3s ease;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    animation: fadeIn 0.3s ease !important;
 }
 
 .manage-shipping-modal {
@@ -545,6 +594,84 @@
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+/* 确认弹窗样式 */
+.confirm-modal-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    animation: fadeIn 0.3s ease !important;
+    padding-top: 40px !important;
+    /* 向下移动40px */
+}
+
+.confirm-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s ease;
+}
+
+.confirm-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.confirm-modal-message {
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.confirm-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.confirm-modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 80px;
+}
+
+.confirm-modal-yes {
+    background: #1890ff;
+    color: white;
+}
+
+.confirm-modal-yes:hover {
+    background: #40a9ff;
+}
+
+.confirm-modal-no {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.confirm-modal-no:hover {
+    background: #e8e8e8;
 }
 
 /* 响应式设计 - 批量发货 */

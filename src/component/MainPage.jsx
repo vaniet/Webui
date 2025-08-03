@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 export default function MainPage() {
     const [seriesList, setSeriesList] = useState([]);
     const [filteredSeriesList, setFilteredSeriesList] = useState([]);
+    const [messageList, setMessageList] = useState([]); // 新增：存储消息数据
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -11,28 +12,39 @@ export default function MainPage() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        async function fetchSeries() {
+        async function fetchData() {
             setLoading(true);
             setError('');
             try {
-                const res = await fetch('http://localhost:7001/series/all');
-                const data = await res.json();
-                if (data.code === 200) {
-                    const series = data.data || [];
+                // 并行获取系列数据和消息数据
+                const [seriesRes, messageRes] = await Promise.all([
+                    fetch('http://localhost:7001/series/all'),
+                    fetch('http://localhost:7001/message/all')
+                ]);
+
+                const seriesData = await seriesRes.json();
+                const messageData = await messageRes.json();
+
+                if (seriesData.code === 200) {
+                    const series = seriesData.data || [];
                     setSeriesList(series);
                     setFilteredSeriesList(series);
                     // 获取所有系列的价格信息
                     await fetchAllPrices(series);
                 } else {
-                    setError(data.message || '获取系列失败');
+                    setError(seriesData.message || '获取系列失败');
+                }
+
+                if (messageData.code === 200) {
+                    setMessageList(messageData.data || []);
                 }
             } catch (err) {
-                setError('网络错误，无法获取系列');
+                setError('网络错误，无法获取数据');
             } finally {
                 setLoading(false);
             }
         }
-        fetchSeries();
+        fetchData();
     }, []);
 
     // 获取所有系列的价格信息
@@ -60,23 +72,23 @@ export default function MainPage() {
         setPriceData(priceMap);
     };
 
-        // 价格显示组件
+    // 价格显示组件
     const PriceDisplay = ({ seriesId }) => {
         const priceInfo = priceData[seriesId];
-        
+
         if (!priceInfo) {
-            return <div style={{ 
-                color: '#999', 
-                fontSize: '14px', 
+            return <div style={{
+                color: '#999',
+                fontSize: '14px',
                 textAlign: 'center',
-                marginTop: '8px' 
+                marginTop: '8px'
             }}>暂无价格</div>;
         }
 
         const hasDiscount = priceInfo.discountRate < 1;
 
         return (
-            <div style={{ 
+            <div style={{
                 marginTop: '8px',
                 display: 'flex',
                 flexDirection: 'column',
@@ -85,24 +97,24 @@ export default function MainPage() {
             }}>
                 {hasDiscount ? (
                     <>
-                        <div style={{ 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
                             justifyContent: 'center',
                             gap: '8px',
                             flexWrap: 'wrap'
                         }}>
-                            <span style={{ 
-                                textDecoration: 'line-through', 
-                                color: '#999', 
+                            <span style={{
+                                textDecoration: 'line-through',
+                                color: '#999',
                                 fontSize: '14px',
                                 lineHeight: '1'
                             }}>
                                 ¥{priceInfo.price}
                             </span>
-                            <span style={{ 
-                                color: 'rgb(195, 40, 42)', 
-                                fontSize: '18px', 
+                            <span style={{
+                                color: 'rgb(195, 40, 42)',
+                                fontSize: '18px',
                                 fontWeight: 'bold',
                                 lineHeight: '1'
                             }}>
@@ -123,9 +135,9 @@ export default function MainPage() {
                         </div>
                     </>
                 ) : (
-                    <div style={{ 
-                        color: '#1890ff', 
-                        fontSize: '18px', 
+                    <div style={{
+                        color: '#1890ff',
+                        fontSize: '18px',
                         fontWeight: 'bold',
                         textAlign: 'center',
                         lineHeight: '1'
@@ -137,7 +149,7 @@ export default function MainPage() {
         );
     };
 
-    // 本地搜索过滤功能
+    // 基于消息内容的搜索过滤功能
     const handleSearch = (value) => {
         setSearchTerm(value);
 
@@ -146,11 +158,19 @@ export default function MainPage() {
             return;
         }
 
-        // 本地过滤系列
-        const filtered = seriesList.filter(series =>
-            series.name.toLowerCase().includes(value.toLowerCase()) ||
-            series.description.toLowerCase().includes(value.toLowerCase())
+        // 在消息数据中搜索匹配的内容
+        const matchedMessages = messageList.filter(message =>
+            message.content.toLowerCase().includes(value.toLowerCase())
         );
+
+        // 获取匹配消息对应的系列ID
+        const matchedSeriesIds = matchedMessages.map(message => message.seriesId);
+
+        // 过滤出匹配的系列
+        const filtered = seriesList.filter(series =>
+            matchedSeriesIds.includes(series.id)
+        );
+
         setFilteredSeriesList(filtered);
     };
 
@@ -180,7 +200,7 @@ export default function MainPage() {
                 }}>
                     <input
                         type="text"
-                        placeholder="搜索系列名称..."
+                        placeholder="搜索内容关键词..."
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
                         style={{
@@ -261,7 +281,7 @@ export default function MainPage() {
                     color: '#666',
                     fontSize: '14px'
                 }}>
-                    找到 {filteredSeriesList.length} 个系列
+                    在内容中匹配到 {filteredSeriesList.length} 个系列
                 </div>
             )}
 

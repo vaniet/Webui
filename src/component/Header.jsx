@@ -33,7 +33,7 @@ const Header = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '0 24px',
-            zIndex: 1000,
+            zIndex: 10,
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
             minWidth: '800px'
         }}>
