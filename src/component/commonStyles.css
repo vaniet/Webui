@@ -343,11 +343,14 @@ body {
   font-size: 20px;
   color: var(--letter-color);
   margin-bottom: 8px;
+  padding: 0 8px;
 }
 
 .series-card-description {
   color: #888;
   font-size: 14px;
+  padding: 0 12px;
+  line-height: 1.5;
 }
 
 .series-style-list {

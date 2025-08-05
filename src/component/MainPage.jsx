@@ -189,137 +189,148 @@ export default function MainPage() {
 
     return (
         <div className="main-page-container" style={{ paddingTop: '20px' }}>
-            <h1 style={{ color: '#692748', marginBottom: 32 }}>在售系列</h1>
+            <div style={{
+                maxWidth: '1300px',
+                margin: '0 auto',
+                background: 'rgba(255, 255, 255, 0.7)',
+                borderRadius: '16px',
+                padding: '40px',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+                <h1 style={{ color: '#692748', marginBottom: 32, textAlign: 'center' }}>在售系列</h1>
 
-            {/* 搜索框 */}
-            <div style={{ marginBottom: 24 }}>
-                <div style={{
-                    position: 'relative',
-                    maxWidth: '400px',
-                    margin: '0 auto'
-                }}>
-                    <input
-                        type="text"
-                        placeholder="搜索内容关键词..."
-                        value={searchTerm}
-                        onChange={(e) => handleSearch(e.target.value)}
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px 12px 60px',
-                            paddingRight: searchTerm ? '44px' : '16px',
-                            border: '2px solid #e8e8e8',
-                            borderRadius: '25px',
-                            fontSize: '16px',
-                            outline: 'none',
-                            transition: 'all 0.3s ease',
-                            boxSizing: 'border-box'
-                        }}
-                        onFocus={(e) => {
-                            e.target.style.borderColor = '#692748';
-                            e.target.style.boxShadow = '0 0 0 3px rgba(105, 39, 72, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                            e.target.style.borderColor = '#e8e8e8';
-                            e.target.style.boxShadow = 'none';
-                        }}
-                        onKeyDown={handleKeyDown}
-                    />
-                    {searchTerm && (
-                        <button
-                            onClick={clearSearch}
+                {/* 搜索框 */}
+                <div style={{ marginBottom: 24 }}>
+                    <div style={{
+                        position: 'relative',
+                        maxWidth: '400px',
+                        margin: '0 auto'
+                    }}>
+                        <input
+                            type="text"
+                            placeholder="搜索内容关键词..."
+                            value={searchTerm}
+                            onChange={(e) => handleSearch(e.target.value)}
                             style={{
-                                position: 'absolute',
-                                right: '16px',
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                background: 'none',
-                                border: 'none',
-                                fontSize: '18px',
-                                color: '#999',
-                                cursor: 'pointer',
-                                padding: '4px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.2s ease'
+                                width: '100%',
+                                padding: '12px 16px 12px 60px',
+                                paddingRight: searchTerm ? '44px' : '16px',
+                                border: '2px solid #e8e8e8',
+                                borderRadius: '25px',
+                                fontSize: '16px',
+                                outline: 'none',
+                                transition: 'all 0.3s ease',
+                                boxSizing: 'border-box'
                             }}
-                            onMouseEnter={(e) => {
-                                e.target.style.backgroundColor = '#f0f0f0';
-                                e.target.style.color = '#666';
+                            onFocus={(e) => {
+                                e.target.style.borderColor = '#692748';
+                                e.target.style.boxShadow = '0 0 0 3px rgba(105, 39, 72, 0.1)';
                             }}
-                            onMouseLeave={(e) => {
-                                e.target.style.backgroundColor = 'transparent';
-                                e.target.style.color = '#999';
+                            onBlur={(e) => {
+                                e.target.style.borderColor = '#e8e8e8';
+                                e.target.style.boxShadow = 'none';
                             }}
-                        >
-                            ✕
-                        </button>
-                    )}
-                    <div style={{
-                        position: 'absolute',
-                        left: '16px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: '#999',
-                        fontSize: '14px',
-                        fontWeight: '500'
-                    }}>
-                        搜索 |
-                    </div>
-                </div>
-            </div>
-
-            {loading && <div>加载中...</div>}
-            {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}
-
-            {/* 搜索状态提示 */}
-            {!loading && !error && searchTerm && (
-                <div style={{
-                    textAlign: 'center',
-                    marginBottom: 16,
-                    color: '#666',
-                    fontSize: '14px'
-                }}>
-                    在内容中匹配到 {filteredSeriesList.length} 个系列
-                </div>
-            )}
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}>
-                {filteredSeriesList.length > 0 ? (
-                    filteredSeriesList.map(series => {
-                        const imageUrl = `http://localhost:7001/${series.cover}`;
-                        return (
-                            <div
-                                key={series.id}
-                                className="series-card"
-                                onClick={() => navigate(`/series/${series.id}`)}
+                            onKeyDown={handleKeyDown}
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={clearSearch}
+                                style={{
+                                    position: 'absolute',
+                                    right: '16px',
+                                    top: '50%',
+                                    transform: 'translateY(-50%)',
+                                    background: 'none',
+                                    border: 'none',
+                                    fontSize: '18px',
+                                    color: '#999',
+                                    cursor: 'pointer',
+                                    padding: '4px',
+                                    borderRadius: '50%',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = '#f0f0f0';
+                                    e.target.style.color = '#666';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'transparent';
+                                    e.target.style.color = '#999';
+                                }}
                             >
-                                <div className="series-card-image">
-                                    <img src={imageUrl} alt={series.name} />
-                                </div>
-                                <div className="series-card-content">
-                                    <div className="series-card-title">{series.name}</div>
-                                    <div className="series-card-description">{series.description}</div>
-                                    <PriceDisplay seriesId={series.id} />
-                                </div>
-                            </div>
-                        );
-                    })
-                ) : !loading && !error && searchTerm ? (
-                    <div style={{
-                        width: '100%',
-                        textAlign: 'center',
-                        padding: '60px 20px',
-                        color: '#999'
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
-                        <div style={{ fontSize: '16px', marginBottom: '8px' }}>未找到相关系列</div>
-                        <div style={{ fontSize: '14px', color: '#ccc' }}>
-                            尝试使用其他关键词搜索
+                                ✕
+                            </button>
+                        )}
+                        <div style={{
+                            position: 'absolute',
+                            left: '16px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: '#999',
+                            fontSize: '14px',
+                            fontWeight: '500'
+                        }}>
+                            搜索 |
                         </div>
                     </div>
-                ) : null}
+                </div>
+
+                {loading && <div>加载中...</div>}
+                {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}
+
+                {/* 搜索状态提示 */}
+                {!loading && !error && searchTerm && (
+                    <div style={{
+                        textAlign: 'center',
+                        marginBottom: 16,
+                        color: '#666',
+                        fontSize: '14px'
+                    }}>
+                        在内容中匹配到 {filteredSeriesList.length} 个系列
+                    </div>
+                )}
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 36 }}>
+                    {filteredSeriesList.length > 0 ? (
+                        filteredSeriesList.map(series => {
+                            const imageUrl = `http://localhost:7001/${series.cover}`;
+                            return (
+                                <div
+                                    key={series.id}
+                                    className="series-card"
+                                    onClick={() => navigate(`/series/${series.id}`)}
+                                >
+                                    <div className="series-card-image">
+                                        <img src={imageUrl} alt={series.name} />
+                                    </div>
+                                    <div className="series-card-content">
+                                        <div className="series-card-title">{series.name}</div>
+                                        <div className="series-card-description">{series.description}</div>
+                                        <PriceDisplay seriesId={series.id} />
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : !loading && !error && searchTerm ? (
+                        <div style={{
+                            width: '100%',
+                            textAlign: 'center',
+                            padding: '60px 20px',
+                            color: '#999'
+                        }}>
+                            <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
+                            <div style={{ fontSize: '16px', marginBottom: '8px' }}>未找到相关系列</div>
+                            <div style={{ fontSize: '14px', color: '#ccc' }}>
+                                尝试使用其他关键词搜索
+                            </div>
+                        </div>
+                    ) : null}
+                </div>
             </div>
         </div>
     );
