@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { useUser } from '../contexts/UserContext';
 import './PlayerShowDetail.css';
 
 const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
+    const { user } = useUser();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showcase, setShowcase] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [commentLoading, setCommentLoading] = useState(false);
+    const [commentError, setCommentError] = useState('');
+    const [newComment, setNewComment] = useState('');
+    const [submittingComment, setSubmittingComment] = useState(false);
 
     useEffect(() => {
         if (isOpen && showcaseId) {
             fetchShowcaseDetail();
+            fetchComments();
         }
     }, [isOpen, showcaseId]);
 
@@ -47,6 +55,102 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
             return `${days}天前`;
         } else {
             return date.toLocaleDateString();
+        }
+    };
+
+    // 获取评论列表
+    const fetchComments = async () => {
+        setCommentLoading(true);
+        setCommentError('');
+        try {
+            const params = new URLSearchParams({
+                page: 1,
+                limit: 20,
+                orderBy: 'createdAt',
+                orderDirection: 'ASC'
+            });
+            const res = await fetch(`http://localhost:7001/comments/player-show/${showcaseId}?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await res.json();
+
+            if (data.code === 200) {
+                setComments(data.data.list || []);
+            } else {
+                setCommentError(data.message || '获取评论失败');
+            }
+        } catch (err) {
+            setCommentError('网络错误，无法获取评论');
+        } finally {
+            setCommentLoading(false);
+        }
+    };
+
+    // 创建评论
+    const handleCreateComment = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            setCommentError('请先登录');
+            return;
+        }
+        if (!newComment.trim()) {
+            setCommentError('请输入评论内容');
+            return;
+        }
+
+        setSubmittingComment(true);
+        setCommentError('');
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:7001/comments/player-show/${showcaseId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: newComment.trim()
+                })
+            });
+            const data = await res.json();
+
+            if (data.code === 200) {
+                setNewComment('');
+                fetchComments(); // 刷新评论列表
+            } else {
+                setCommentError(data.message || '评论创建失败');
+            }
+        } catch (err) {
+            setCommentError('网络错误，无法创建评论');
+        } finally {
+            setSubmittingComment(false);
+        }
+    };
+
+    // 删除评论
+    const handleDeleteComment = async (commentId) => {
+        if (!user) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:7001/comments/${commentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+
+            if (data.code === 200) {
+                fetchComments(); // 刷新评论列表
+            } else {
+                setCommentError(data.message || '删除评论失败');
+            }
+        } catch (err) {
+            setCommentError('网络错误，无法删除评论');
         }
     };
 
@@ -229,31 +333,17 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
                             {/* 图片展示 */}
                             {showcase.images && showcase.images.length > 0 && (
                                 <div style={{ padding: '0 24px 24px 24px' }}>
-                                    {/* 图片网格 */}
-                                    <div style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                                        gap: '12px',
-                                        marginBottom: '16px'
-                                    }}>
+                                    {/* 固定规格图片网格 */}
+                                    <div className="fixed-size-image-grid">
                                         {showcase.images.map((image, index) => (
                                             <div
                                                 key={index}
-                                                style={{
-                                                    borderRadius: '8px',
-                                                    overflow: 'hidden',
-                                                    aspectRatio: '4/3',
-                                                    background: '#f8f9fa'
-                                                }}
+                                                className="fixed-size-image-item"
                                             >
                                                 <img
                                                     src={`http://localhost:7001/${image}`}
                                                     alt={`图片 ${index + 1}`}
-                                                    style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover'
-                                                    }}
+                                                    className="fixed-size-image"
                                                     onError={(e) => {
                                                         e.target.style.display = 'none';
                                                     }}
@@ -263,6 +353,150 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
                                     </div>
                                 </div>
                             )}
+
+                            {/* 评论区域 */}
+                            <div style={{ borderTop: '1px solid #f0f0f0', padding: '24px' }}>
+                                <div style={{ fontSize: '18px', fontWeight: '600', color: '#333', marginBottom: '20px' }}>
+                                    评论 ({comments.length})
+                                </div>
+
+                                {/* 评论输入框 */}
+                                {user && (
+                                    <form onSubmit={handleCreateComment} style={{ marginBottom: '24px' }}>
+                                        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                            <img
+                                                src={`http://localhost:7001/${user.avatar}`}
+                                                alt={user.username}
+                                                style={{
+                                                    width: '40px',
+                                                    height: '40px',
+                                                    borderRadius: '50%',
+                                                    flexShrink: 0
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.src = 'https://via.placeholder.com/40x40/692748/ffffff?text=U';
+                                                }}
+                                            />
+                                            <div style={{ flex: 1 }}>
+                                                <textarea
+                                                    value={newComment}
+                                                    onChange={(e) => setNewComment(e.target.value)}
+                                                    placeholder="写下你的评论..."
+                                                    style={{
+                                                        width: '100%',
+                                                        minHeight: '80px',
+                                                        padding: '12px',
+                                                        border: '1px solid #e8e8e8',
+                                                        borderRadius: '8px',
+                                                        fontSize: '14px',
+                                                        resize: 'vertical',
+                                                        outline: 'none',
+                                                        fontFamily: 'inherit'
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        e.target.style.borderColor = '#692748';
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        e.target.style.borderColor = '#e8e8e8';
+                                                    }}
+                                                />
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                                                    <div style={{ fontSize: '12px', color: '#999' }}>
+                                                        {newComment.length}/200
+                                                    </div>
+                                                    <button
+                                                        type="submit"
+                                                        disabled={submittingComment || !newComment.trim()}
+                                                        style={{
+                                                            padding: '8px 16px',
+                                                            background: submittingComment || !newComment.trim() ? '#ccc' : '#692748',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '6px',
+                                                            fontSize: '14px',
+                                                            cursor: submittingComment || !newComment.trim() ? 'not-allowed' : 'pointer'
+                                                        }}
+                                                    >
+                                                        {submittingComment ? '发送中...' : '发送评论'}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {commentError && (
+                                            <div style={{ color: '#ff4d4f', fontSize: '12px', marginTop: '8px' }}>
+                                                {commentError}
+                                            </div>
+                                        )}
+                                    </form>
+                                )}
+
+                                {/* 评论列表 */}
+                                {commentLoading ? (
+                                    <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                                        加载评论中...
+                                    </div>
+                                ) : comments.length > 0 ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                        {comments.map(comment => (
+                                            <div key={comment.id} style={{
+                                                display: 'flex',
+                                                gap: '12px',
+                                                padding: '16px',
+                                                background: '#f8f9fa',
+                                                borderRadius: '8px'
+                                            }}>
+                                                <img
+                                                    src={`http://localhost:7001/${comment.user.avatar}`}
+                                                    alt={comment.user.username}
+                                                    style={{
+                                                        width: '40px',
+                                                        height: '40px',
+                                                        borderRadius: '50%',
+                                                        flexShrink: 0
+                                                    }}
+                                                    onError={(e) => {
+                                                        e.target.src = 'https://via.placeholder.com/40x40/692748/ffffff?text=U';
+                                                    }}
+                                                />
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                                        <div style={{ fontWeight: '600', fontSize: '14px', color: '#333' }}>
+                                                            {comment.user.username}
+                                                        </div>
+                                                        <div style={{ fontSize: '12px', color: '#999' }}>
+                                                            {formatTime(comment.createdAt)}
+                                                        </div>
+                                                    </div>
+                                                    <div style={{ fontSize: '14px', color: '#666', lineHeight: '1.5' }}>
+                                                        {comment.content}
+                                                    </div>
+                                                    {user && user.userId === comment.user.userId && (
+                                                        <button
+                                                            onClick={() => handleDeleteComment(comment.id)}
+                                                            style={{
+                                                                marginTop: '8px',
+                                                                padding: '4px 8px',
+                                                                background: 'none',
+                                                                border: '1px solid #ff4d4f',
+                                                                color: '#ff4d4f',
+                                                                borderRadius: '4px',
+                                                                fontSize: '12px',
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            删除
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+                                        还没有评论，快来发表第一条评论吧！
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
