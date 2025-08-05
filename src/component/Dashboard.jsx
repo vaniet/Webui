@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
 import { useEffect } from 'react';
+import EditUser from './editUser';
 
 function TopMessage({ message, type, onClose }) {
     React.useEffect(() => {
@@ -24,6 +25,7 @@ const Dashboard = () => {
     const [orderStats, setOrderStats] = useState(null);
     const [orderLoading, setOrderLoading] = useState(true);
     const [orderError, setOrderError] = useState('');
+    const [showEditUser, setShowEditUser] = useState(false);
     const navigate = useNavigate();
     const { user, loading, error, logout, refreshUser } = useUser();
 
@@ -254,10 +256,7 @@ const Dashboard = () => {
                                     🎁 我的展示柜
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        setMsgType('info');
-                                        setMsg('功能开发中...');
-                                    }}
+                                    onClick={() => setShowEditUser(true)}
                                     style={{
                                         padding: '10px 20px',
                                         border: '1px solid #1890ff',
@@ -317,6 +316,20 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
+            
+            {/* 编辑用户信息组件 */}
+            {showEditUser && (
+                <EditUser
+                    onSuccess={(updatedUser) => {
+                        setMsgType('success');
+                        setMsg('用户信息更新成功！');
+                        setShowEditUser(false);
+                        // 刷新用户信息
+                        refreshUser();
+                    }}
+                    onCancel={() => setShowEditUser(false)}
+                />
+            )}
         </>
     );
 };
