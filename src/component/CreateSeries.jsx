@@ -388,16 +388,8 @@ const CreateSeries = () => {
 
                         {/* 样式列表 */}
                         <div style={{ marginBottom: '32px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <div style={{ marginBottom: '16px' }}>
                                 <h2 style={{ color: '#692748' }}>样式列表</h2>
-                                <button
-                                    type="button"
-                                    className="button"
-                                    onClick={addStyle}
-                                    style={{ padding: '8px 16px', fontSize: '14px' }}
-                                >
-                                    添加样式
-                                </button>
                             </div>
 
                             {styles.map((style, index) => (
@@ -474,6 +466,18 @@ const CreateSeries = () => {
                                     </div>
                                 </div>
                             ))}
+
+                            {/* 添加样式按钮 */}
+                            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                                <button
+                                    type="button"
+                                    className="button"
+                                    onClick={addStyle}
+                                    style={{ padding: '8px 16px', fontSize: '14px' }}
+                                >
+                                    添加样式
+                                </button>
+                            </div>
                         </div>
 
                         {/* 提交按钮 */}

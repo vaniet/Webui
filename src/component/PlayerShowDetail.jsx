@@ -175,7 +175,8 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '20px'
+                    padding: '20px',
+                    paddingTop: '80px'
                 }}
             >
                 {/* 弹窗内容 */}
@@ -187,7 +188,7 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
                         borderRadius: '12px',
                         maxWidth: '800px',
                         width: '100%',
-                        maxHeight: '90vh',
+                        maxHeight: 'calc(90vh - 80px)',
                         overflow: 'auto',
                         position: 'relative'
                     }}
