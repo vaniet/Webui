@@ -211,6 +211,7 @@
     justify-content: center;
     z-index: 1000;
     padding: 20px;
+    padding-top: 80px;
 }
 
 .detail-modal {
@@ -218,7 +219,7 @@
     border-radius: 16px;
     max-width: 600px;
     width: 100%;
-    max-height: 90vh;
+    max-height: calc(90vh - 80px);
     overflow-y: auto;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
@@ -574,7 +575,7 @@
 
     .detail-modal {
         margin: 10px;
-        max-height: 95vh;
+        max-height: calc(95vh - 80px);
     }
 
     .detail-modal-header {
