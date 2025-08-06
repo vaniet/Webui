@@ -33,7 +33,9 @@
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(105, 39, 72, 0.1);
-    height: fit-content;
+    height: 360px;
+    display: flex;
+    flex-direction: column;
 }
 
 .blind-box-card:hover {
@@ -95,6 +97,7 @@
     background: #f8f9fa;
     aspect-ratio: 1;
     border: 2px solid rgba(105, 39, 72, 0.1);
+    flex-shrink: 0;
 }
 
 .blind-box-cover {
@@ -119,14 +122,17 @@
 }
 
 .blind-box-description {
-    font-size: 13px;
+    font-size: 16px;
     color: #666;
     line-height: 1.5;
     margin-bottom: 12px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+    min-height: 60px;
+    padding: 0 8px;
 }
 
 .blind-box-hidden-badge {
@@ -255,6 +261,7 @@
 
     .blind-box-card {
         padding: 16px;
+        height: 400px;
     }
 
     .blind-box-series-cover {

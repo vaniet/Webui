@@ -145,11 +145,9 @@ const BlindBoxShowcase = () => {
                                         </div>
                                     </div>
 
-                                    {purchase.style.description && (
-                                        <div className="blind-box-description">
-                                            {purchase.style.description}
-                                        </div>
-                                    )}
+                                    <div className="blind-box-description">
+                                        {purchase.style.description || purchase.style.name}
+                                    </div>
 
                                     {purchase.style.isHidden && (
                                         <div className="blind-box-hidden-badge">
