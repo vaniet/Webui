@@ -12,6 +12,7 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
     const [commentError, setCommentError] = useState('');
     const [newComment, setNewComment] = useState('');
     const [submittingComment, setSubmittingComment] = useState(false);
+    const [deletingShowcase, setDeletingShowcase] = useState(false);
 
     useEffect(() => {
         if (isOpen && showcaseId) {
@@ -151,6 +152,42 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
             }
         } catch (err) {
             setCommentError('网络错误，无法删除评论');
+        }
+    };
+
+    // 删除玩家秀
+    const handleDeleteShowcase = async () => {
+        if (!user || !showcase) return;
+
+        if (!window.confirm('确定要删除这个玩家秀吗？删除后无法恢复。')) {
+            return;
+        }
+
+        setDeletingShowcase(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`http://localhost:7001/player-shows/${showcaseId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await res.json();
+
+            if (data.code === 200) {
+                // 删除成功，关闭弹窗并刷新列表
+                onClose();
+                // 可以在这里添加一个回调函数来刷新父组件的列表
+                if (window.location.pathname === '/playershow') {
+                    window.location.reload();
+                }
+            } else {
+                setError(data.message || '删除玩家秀失败');
+            }
+        } catch (err) {
+            setError('网络错误，无法删除玩家秀');
+        } finally {
+            setDeletingShowcase(false);
         }
     };
 
@@ -333,7 +370,40 @@ const PlayerShowDetail = ({ isOpen, onClose, showcaseId }) => {
 
                             {/* 图片展示 */}
                             {showcase.images && showcase.images.length > 0 && (
-                                <div style={{ padding: '0 24px 24px 24px' }}>
+                                <div style={{ padding: '0 24px 24px 24px', position: 'relative' }}>
+                                    {/* 删除链接 - 图片区域右下角 */}
+                                    {user && user.userId === showcase.user.userId && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '16px',
+                                            right: '16px',
+                                            zIndex: 10
+                                        }}>
+                                            <span
+                                                onClick={handleDeleteShowcase}
+                                                style={{
+                                                    color: deletingShowcase ? '#ccc' : '#666',
+                                                    fontSize: '15px',
+                                                    cursor: deletingShowcase ? 'not-allowed' : 'pointer',
+                                                    textDecoration: 'underline',
+                                                    transition: 'all 0.3s ease',
+                                                    userSelect: 'none'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!deletingShowcase) {
+                                                        e.target.style.color = '#999';
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!deletingShowcase) {
+                                                        e.target.style.color = '#666';
+                                                    }
+                                                }}
+                                            >
+                                                {deletingShowcase ? '删除中...' : '删除'}
+                                            </span>
+                                        </div>
+                                    )}
                                     {/* 固定规格图片网格 */}
                                     <div className="fixed-size-image-grid">
                                         {showcase.images.map((image, index) => (
