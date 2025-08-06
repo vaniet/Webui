@@ -467,24 +467,23 @@ const ManageOrders = () => {
                 )}
 
                 {/* 订单列表 */}
-                <div className="manage-orders-container">
-                    {loading ? (
-                        <div className="loading-container">
-                            <div className="loading-spinner"></div>
-                            <div className="loading-text">加载中...</div>
-                        </div>
-                    ) : error ? (
-                        <div className="error-container">
-                            <div className="error-icon">⚠️</div>
-                            <div className="error-text">{error}</div>
-                        </div>
-                    ) : orders.length === 0 ? (
-                        <div className="manage-no-orders">
-                            <div className="manage-no-orders-icon">📦</div>
-                            <div className="manage-no-orders-text">暂无订单</div>
-                        </div>
-                    ) : (
-                        <div className="manage-orders-grid">
+                {loading ? (
+                    <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                        <div className="loading-text">加载中...</div>
+                    </div>
+                ) : error ? (
+                    <div className="error-container">
+                        <div className="error-icon">⚠️</div>
+                        <div className="error-text">{error}</div>
+                    </div>
+                ) : orders.length === 0 ? (
+                    <div className="manage-no-orders">
+                        <div className="manage-no-orders-icon">📦</div>
+                        <div className="manage-no-orders-text">暂无订单</div>
+                    </div>
+                ) : (
+                    <div className="manage-orders-grid">
                             {orders.map(order => (
                                 <div key={order.id} className={`manage-order-card ${selectedOrders.has(order.id) ? 'selected' : ''}`}>
                                     <div className="manage-order-header">
@@ -590,7 +589,6 @@ const ManageOrders = () => {
                             ))}
                         </div>
                     )}
-                </div>
 
                 {/* 分页 */}
                 {totalPages > 1 && (

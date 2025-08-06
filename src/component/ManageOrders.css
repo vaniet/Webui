@@ -42,7 +42,7 @@
     max-width: 1200px;
     margin: 40px auto 80px auto;
     padding: 32px 16px;
-    width: auto;
+    width: 650px;
     background: white;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
@@ -78,11 +78,6 @@
     background: var(--primary-pink);
     color: white;
     border-color: var(--primary-pink);
-}
-
-/* 订单列表容器 */
-.manage-orders-container {
-    margin-bottom: 32px;
 }
 
 /* 订单网格 */
