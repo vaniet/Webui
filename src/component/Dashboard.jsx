@@ -269,23 +269,7 @@ const Dashboard = () => {
                                 >
                                     编辑信息
                                 </button>
-                                <button
-                                    onClick={() => {
-                                        setMsgType('info');
-                                        setMsg('功能开发中...');
-                                    }}
-                                    style={{
-                                        padding: '10px 20px',
-                                        border: '1px solid #52c41a',
-                                        borderRadius: '6px',
-                                        background: 'white',
-                                        color: '#52c41a',
-                                        cursor: 'pointer',
-                                        fontSize: '14px'
-                                    }}
-                                >
-                                    修改密码
-                                </button>
+
                                 <button
                                     onClick={() => {
                                         if (window.confirm('确定要退出登录吗？')) {
@@ -316,7 +300,7 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
-            
+
             {/* 编辑用户信息组件 */}
             {showEditUser && (
                 <EditUser

@@ -11,6 +11,8 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
         avatar: '',
         password: ''
     });
+    const [showPasswordChange, setShowPasswordChange] = useState(false);
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
@@ -71,6 +73,9 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
         if (formData.password) {
             if (!passwordValid(formData.password)) {
                 newErrors.password = '密码至少8位且包含数字、字母、特殊字符至少两种组合';
+            }
+            if (formData.password !== confirmPassword) {
+                newErrors.confirmPassword = '两次输入的密码不一致';
             }
         }
 
@@ -168,6 +173,8 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
                 ...prev,
                 password: ''
             }));
+            setConfirmPassword('');
+            setShowPasswordChange(false);
 
         } catch (error) {
             console.error('更新用户信息失败:', error);
@@ -294,17 +301,83 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">新密码</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            placeholder="留空则不修改密码，至少8位且包含数字、字母、特殊字符至少两种组合"
-                            className={errors.password ? 'error' : ''}
-                        />
-                        {errors.password && <span className="error-text">{errors.password}</span>}
+                        {!showPasswordChange ? (
+                            <button
+                                type="button"
+                                onClick={() => setShowPasswordChange(true)}
+                                style={{
+                                    padding: '10px 20px',
+                                    border: '1px solid #1890ff',
+                                    borderRadius: '6px',
+                                    background: 'white',
+                                    color: '#1890ff',
+                                    cursor: 'pointer',
+                                    fontSize: '14px'
+                                }}
+                            >
+                                更改密码
+                            </button>
+                        ) : (
+                            <div>
+                                <label htmlFor="password">新密码</label>
+                                {errors.password && <span className="error-text" style={{ display: 'block', marginBottom: '4px' }}>{errors.password}</span>}
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    placeholder="请输入新密码，至少8位且包含数字、字母、特殊字符至少两种组合"
+                                    className={errors.password ? 'error' : ''}
+                                />
+                                
+                                <label htmlFor="confirmPassword" style={{ marginTop: '12px', display: 'block' }}>确认新密码</label>
+                                {errors.confirmPassword && <span className="error-text" style={{ display: 'block', marginBottom: '4px' }}>{errors.confirmPassword}</span>}
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    value={confirmPassword}
+                                    onChange={(e) => {
+                                        setConfirmPassword(e.target.value);
+                                        if (errors.confirmPassword) {
+                                            setErrors(prev => ({
+                                                ...prev,
+                                                confirmPassword: ''
+                                            }));
+                                        }
+                                    }}
+                                    placeholder="请再次输入新密码"
+                                    className={errors.confirmPassword ? 'error' : ''}
+                                />
+                                
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowPasswordChange(false);
+                                        setFormData(prev => ({ ...prev, password: '' }));
+                                        setConfirmPassword('');
+                                        setErrors(prev => ({
+                                            ...prev,
+                                            password: '',
+                                            confirmPassword: ''
+                                        }));
+                                    }}
+                                    style={{
+                                        padding: '6px 12px',
+                                        border: '1px solid #999',
+                                        borderRadius: '4px',
+                                        background: 'white',
+                                        color: '#999',
+                                        cursor: 'pointer',
+                                        fontSize: '12px',
+                                        marginTop: '8px',
+                                        marginLeft: '12px'
+                                    }}
+                                >
+                                    取消修改密码
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="form-actions">
