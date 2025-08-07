@@ -1,12 +1,16 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Web开发前端
+盲盒抽盒机前端项目：
+### 主界面
+展示所有盲盒系列
+### 盲盒详情页
+展示盲盒系列详情，包括所含款式、可用库存、抽盒功能
+### 我的订单
+显示当前用户订单，按照订单状态分类
+### 展示柜
+展示已经抽到的款式
+### 个人信息界面
+个人信息（用户名、手机号等），可修改个人信息、订单状态查询
+### 管理员界面：
+1. 创建新系列（包含价格、折扣设置）
+2. 管理盲盒（包含库存等管理内容）
+3. 订单管理（查看抽盒系统产生的所有订单，对已填写的订单进行发货）
