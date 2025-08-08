@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useUser } from '../contexts/UserContext';
 import './editUser.css';
 
-const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
+const EditUser = ({ onSuccess, onCancel }) => {
     const { user } = useUser();
     const [formData, setFormData] = useState({
         username: '',
@@ -144,14 +144,8 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
                 requestData.avatar = avatarPath;
             }
 
-            let url;
-            if (isAdmin && userId) {
-                // 管理员修改指定用户信息
-                url = `http://localhost:7001/users/update/${userId}`;
-            } else {
-                // 用户修改自己的信息
-                url = 'http://localhost:7001/users/update';
-            }
+            // 用户修改自己的信息
+            const url = 'http://localhost:7001/users/update';
 
             const token = localStorage.getItem('token');
             const response = await axios.put(url, requestData, {
@@ -161,11 +155,17 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
                 }
             });
 
-            setMessage('用户信息更新成功！');
+            // 检查响应状态
+            if (response.data.code === 200) {
+                setMessage(response.data.message || '用户信息更新成功！');
 
-            // 调用成功回调
-            if (onSuccess) {
-                onSuccess(response.data);
+                // 调用成功回调
+                if (onSuccess) {
+                    onSuccess(response.data.data || response.data);
+                }
+            } else {
+                // 处理业务逻辑错误
+                setMessage(response.data.message || '更新用户信息失败，请重试');
             }
 
             // 清空密码字段
@@ -178,7 +178,15 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
 
         } catch (error) {
             console.error('更新用户信息失败:', error);
-            setMessage(error.response?.data?.message || '更新用户信息失败，请重试');
+            // 处理网络错误或服务器错误
+            if (error.response?.data?.message) {
+                setMessage(error.response.data.message);
+            } else if (error.response?.data?.code) {
+                // 处理有状态码但非200的响应
+                setMessage(error.response.data.message || '更新用户信息失败，请重试');
+            } else {
+                setMessage('网络错误，请检查网络连接后重试');
+            }
         } finally {
             setLoading(false);
         }
@@ -202,7 +210,7 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
         <div className="edit-user-container" onClick={handleCancel}>
             <div className="edit-user-card" onClick={(e) => e.stopPropagation()}>
                 <h2 className="edit-user-title">
-                    {isAdmin ? '修改用户信息' : '修改个人信息'}
+                    修改个人信息
                 </h2>
 
                 {message && (
@@ -330,7 +338,7 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
                                     placeholder="请输入新密码，至少8位且包含数字、字母、特殊字符至少两种组合"
                                     className={errors.password ? 'error' : ''}
                                 />
-                                
+
                                 <label htmlFor="confirmPassword" style={{ marginTop: '12px', display: 'block' }}>确认新密码</label>
                                 {errors.confirmPassword && <span className="error-text" style={{ display: 'block', marginBottom: '4px' }}>{errors.confirmPassword}</span>}
                                 <input
@@ -349,7 +357,7 @@ const EditUser = ({ userId, isAdmin = false, onSuccess, onCancel }) => {
                                     placeholder="请再次输入新密码"
                                     className={errors.confirmPassword ? 'error' : ''}
                                 />
-                                
+
                                 <button
                                     type="button"
                                     onClick={() => {
