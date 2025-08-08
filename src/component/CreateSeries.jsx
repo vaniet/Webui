@@ -35,6 +35,7 @@ const CreateSeries = () => {
     const [priceInfo, setPriceInfo] = useState({
         price: ''
     });
+    const [priceError, setPriceError] = useState('');
 
     // 样式列表
     const [styles, setStyles] = useState([
@@ -60,6 +61,17 @@ const CreateSeries = () => {
     const handlePriceChange = (e) => {
         const { name, value } = e.target;
         setPriceInfo(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handlePriceInputChange = (e) => {
+        const { value } = e.target;
+        const validPattern = /^\d*(?:\.\d{0,2})?$/;
+        setPriceInfo(prev => ({ ...prev, price: value }));
+        if (value === '' || validPattern.test(value)) {
+            setPriceError('');
+        } else {
+            setPriceError('仅允许输入整数或最多两位小数');
+        }
     };
 
     const handleStyleChange = (index, field, value) => {
@@ -141,9 +153,10 @@ const CreateSeries = () => {
                 throw new Error('至少需要添加一个样式');
             }
 
-            // 验证价格
-            if (!priceInfo.price || parseFloat(priceInfo.price) <= 0) {
-                throw new Error('请输入有效的价格');
+            // 验证价格（整数或至多两位小数）
+            const validPricePattern = /^\d+(?:\.\d{1,2})?$/;
+            if (!priceInfo.price || !validPricePattern.test(priceInfo.price) || parseFloat(priceInfo.price) <= 0) {
+                throw new Error('请输入有效的价格（整数或至多两位小数）');
             }
 
             // 1. 上传系列封面
@@ -366,25 +379,6 @@ const CreateSeries = () => {
                             </div>
                         </div>
 
-                        {/* 价格设置 */}
-                        <div style={{ marginBottom: '32px' }}>
-                            <h2 style={{ marginBottom: '16px', color: '#692748' }}>价格设置</h2>
-
-                            <div className="form-group">
-                                <label>价格 (元) *</label>
-                                <input
-                                    type="number"
-                                    name="price"
-                                    className="input-field"
-                                    placeholder="请输入价格"
-                                    value={priceInfo.price}
-                                    onChange={handlePriceChange}
-                                    min="0"
-                                    step="0.01"
-                                    required
-                                />
-                            </div>
-                        </div>
 
                         {/* 样式列表 */}
                         <div style={{ marginBottom: '32px' }}>
@@ -467,6 +461,7 @@ const CreateSeries = () => {
                                 </div>
                             ))}
 
+
                             {/* 添加样式按钮 */}
                             <div style={{ textAlign: 'center', marginTop: '16px' }}>
                                 <button
@@ -480,12 +475,32 @@ const CreateSeries = () => {
                             </div>
                         </div>
 
+                            {/* 价格设置 */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <h2 style={{ color: '#692748' }}>价格设置</h2>
+                            </div>
+                            <div className="form-group" style={{ marginTop: '16px' }}>
+                                <label>价格 (元) *</label>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    className="input-field"
+                                    placeholder="请输入价格（整数或至多两位小数）"
+                                    value={priceInfo.price}
+                                    onChange={handlePriceInputChange}
+                                />
+                                {priceError && (
+                                    <div style={{ color: '#ff4d4f', fontSize: '12px', marginTop: '6px' }}>
+                                        {priceError}
+                                    </div>
+                                )}
+                            </div>
                         {/* 提交按钮 */}
                         <div style={{ textAlign: 'center' }}>
                             <button
                                 type="submit"
                                 className="button"
-                                disabled={loading}
+                                disabled={loading || !!priceError || !priceInfo.price}
                                 style={{ marginRight: '16px' }}
                             >
                                 {loading ? '创建中...' : '创建系列'}
