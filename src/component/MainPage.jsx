@@ -18,7 +18,7 @@ export default function MainPage() {
             try {
                 // 并行获取系列数据和消息数据
                 const [seriesRes, messageRes] = await Promise.all([
-                    fetch('http://localhost:7001/series/all'),
+                    fetch('http://localhost:7001/series/listed'),
                     fetch('http://localhost:7001/message/all')
                 ]);
 

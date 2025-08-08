@@ -35,6 +35,7 @@ const EditSeries = () => {
     const [priceData, setPriceData] = useState({});
     const [priceLoading, setPriceLoading] = useState(false);
     const [priceForm, setPriceForm] = useState({ price: '', discountRate: '' });
+    const [listedLoadingId, setListedLoadingId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -92,6 +93,32 @@ const EditSeries = () => {
         } catch (err) {
             setMsgType('error');
             setMsg('删除系列失败');
+        }
+    };
+
+    // 上/下架
+    const toggleListed = async (series) => {
+        if (!series) return;
+        setListedLoadingId(series.id);
+        try {
+            const res = await fetch(`http://localhost:7001/series/${series.id}/listed`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isListed: !series.isListed })
+            });
+            const data = await res.json();
+            if (data.code === 200) {
+                setSeriesList(prev => prev.map(s => s.id === series.id ? { ...s, isListed: !series.isListed } : s));
+                setMsgType('success');
+                setMsg(!series.isListed ? '系列已上架' : '系列已下架');
+            } else {
+                throw new Error(data.message || '更新上架状态失败');
+            }
+        } catch (err) {
+            setMsgType('error');
+            setMsg('更新上架状态失败');
+        } finally {
+            setListedLoadingId(null);
         }
     };
 
@@ -426,14 +453,20 @@ const EditSeries = () => {
                                                 库存管理
                                             </button>
                                             <button
-                                                className="delete-series-button"
-                                                onClick={() => {
-                                                    if (window.confirm(`确定要删除系列"${series.name}"吗？这将同时删除所有相关款式。`)) {
-                                                        deleteSeries(series.id);
-                                                    }
+                                                className="toggle-listed-button"
+                                                onClick={() => toggleListed(series)}
+                                                disabled={listedLoadingId === series.id}
+                                                style={{
+                                                    padding: '8px 16px',
+                                                    border: `1px solid ${series.isListed ? '#faad14' : '#52c41a'}`,
+                                                    borderRadius: '5px',
+                                                    background: 'white',
+                                                    color: series.isListed ? '#faad14' : '#52c41a',
+                                                    cursor: listedLoadingId === series.id ? 'not-allowed' : 'pointer',
+                                                    fontSize: '14px'
                                                 }}
                                             >
-                                                删除系列
+                                                {listedLoadingId === series.id ? '处理中...' : (series.isListed ? '下架' : '上架')}
                                             </button>
                                         </div>
                                     </div>
